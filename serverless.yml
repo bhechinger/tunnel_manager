@@ -12,11 +12,17 @@ package:
   include:
     - bin/**
 
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  tableName: TunnelManager-${self:custom.stage}
+
 functions:
   TunnelManager:
     handler: bin/tunnel_manager
     memorySize: 256
     timeout: 30
+    environment:
+      TABLE_NAME: ${self:custom.tableName}
     events:
       - http:
           method: GET
@@ -32,3 +38,29 @@ resources:
       Properties:
         Name: ${self:service}
         Body: ${file(openapi.yaml)}
+    DynamoDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: tunnelId
+            AttributeType: N
+        KeySchema:
+          - AttributeName: tunnelId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+    DynamoDBIamPolicy:
+      Type: AWS::IAM::Policy
+      DependsOn: DynamoDbTable
+      Properties:
+        PolicyName: lambda-dynamodb
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:GetItem
+                - dynamodb:PutItem
+              Resource: arn:aws:dynamodb:*:*:table/my-table
+        Roles:
+          - Ref: IamRoleLambdaExecution

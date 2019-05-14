@@ -9,14 +9,14 @@
     "url" : "/"
   } ],
   "paths" : {
-    "/math" : {
+    "/site" : {
       "post" : {
-        "operationId" : "PostMath",
+        "operationId" : "AddSite",
         "requestBody" : {
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/InputData"
+                "$ref" : "#/components/schemas/Site"
               }
             }
           },
@@ -24,11 +24,11 @@
         },
         "responses" : {
           "200" : {
-            "description" : "returns the hostname of the machine",
+            "description" : "returns the newly created site",
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "$ref" : "#/components/schemas/OutputData"
+                  "$ref" : "#/components/schemas/Site"
                 }
               }
             }
@@ -54,30 +54,76 @@
   },
   "components" : {
     "schemas" : {
-      "InputData" : {
-        "title" : "Two number to do an operation on",
+      "Site" : {
+        "title" : "Site Information",
         "type" : "object",
         "properties" : {
-          "operation" : {
+          "tunnelId" : {
+            "type" : "integer",
+            "description" : "The ID of the tunnel [Ignored for site creation]",
+            "format" : "int32"
+          },
+          "public_ip" : {
+            "pattern" : "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$",
             "type" : "string",
-            "description" : "the operation to perform",
-            "enum" : [ "ADD", "SUBTRACT", "MULTIPLY" ]
+            "description" : "The public IP address of the router",
+            "format" : "ipv4"
           },
-          "a" : {
-            "type" : "integer",
-            "description" : "Value A",
-            "format" : "int64"
+          "mgmt_ip" : {
+            "pattern" : "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$",
+            "type" : "string",
+            "description" : "The IP address used by the controller to talk to the router",
+            "format" : "ipv4"
           },
-          "b" : {
+          "ip_class" : {
             "type" : "integer",
-            "description" : "Value B",
-            "format" : "int64"
+            "description" : "The IP Class of this connection (IPv4 or IPv6) [IPv4 default]",
+            "format" : "int32",
+            "enum" : [ 4, 6 ]
+          },
+          "hostname" : {
+            "type" : "string",
+            "description" : "The public DNS name of the router (for dynamic DNS lookups)"
+          },
+          "cost" : {
+            "maximum" : 63,
+            "minimum" : 1,
+            "type" : "integer",
+            "description" : "The DECnet routing cost to assign to this tunnel [20 default]",
+            "format" : "int32"
+          },
+          "email" : {
+            "pattern" : "/^(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$/",
+            "type" : "string",
+            "description" : "The email to send notifications to",
+            "format" : "email"
+          },
+          "snmp_community" : {
+            "type" : "string",
+            "description" : "A RW SNMP community on the router to make updates with"
+          },
+          "tunnel_type" : {
+            "type" : "string",
+            "description" : "The tunnel type for this tunnel. GRE is the only option currently. [ignored]",
+            "enum" : [ "GRE", "IPSec" ]
+          },
+          "topology_type" : {
+            "type" : "string",
+            "description" : "The topology type of this endpoint. (mesh, hub or spoke) [mesh default]",
+            "enum" : [ "mesh", "hub", "spoke" ]
           }
         },
         "example" : {
-          "a" : 6,
-          "b" : 1,
-          "operation" : "ADD"
+          "tunnelId" : 81,
+          "public_ip" : "8.8.8.8",
+          "mgmt_ip" : "172.16.0.12",
+          "ip_class" : 4,
+          "hostname" : "myrouter.dyndns.com",
+          "cost" : 20,
+          "email" : "nobody@nowhere.com",
+          "snmp_community" : "letmein",
+          "tunnel_type" : "GRE",
+          "topology_type" : "mesh"
         }
       },
       "OutputData" : {

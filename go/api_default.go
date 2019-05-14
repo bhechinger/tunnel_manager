@@ -14,58 +14,58 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 )
 
-// Need to figure out how to get the openapi generator to add the string modifier
-type Payload struct {
-	Operation string `json:"operation"`
-	A         int64  `json:"a,string"`
-	B         int64  `json:"b,string"`
-}
-
-func PostMath(w http.ResponseWriter, r *http.Request) {
-	var id Payload
-	var answer int64
+func AddSite(w http.ResponseWriter, r *http.Request) {
+	var si Site
 
 	if r.Body == nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_, err := w.Write([]byte("Please send a request body"))
 		if err != nil {
-			log.Print("Failed to sent message")
+			log.Print("Failed to send message")
 		}
 		return
 	}
-	err := json.NewDecoder(r.Body).Decode(&id)
+	err := json.NewDecoder(r.Body).Decode(&si)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_, err := w.Write([]byte(err.Error()))
 		if err != nil {
-			log.Print("Failed to sent message")
+			log.Print("Failed to send message")
 		}
 		return
 	}
+	//if id.Operation == "ADD" {
+	//	answer = id.A + id.B
+	//} else if id.Operation == "SUBTRACT" {
+	//	answer = id.A - id.B
+	//} else if id.Operation == "MULTIPLY" {
+	//	answer = id.A * id.B
+	//} else {
+	//	w.WriteHeader(http.StatusTeapot)
+	//	_, err := w.Write([]byte(fmt.Sprintf("Invalid operator: %s", id.Operation)))
+	//	if err != nil {
+	//		log.Print("Failed to sent message")
+	//	}
+	//	return
+	//}
 
-	if id.Operation == "ADD" {
-		answer = id.A + id.B
-	} else if id.Operation == "SUBTRACT" {
-		answer = id.A - id.B
-	} else if id.Operation == "MULTIPLY" {
-		answer = id.A * id.B
-	} else {
-		w.WriteHeader(http.StatusTeapot)
-		_, err := w.Write([]byte(fmt.Sprintf("Invalid operator: %s", id.Operation)))
-		if err != nil {
-			log.Print("Failed to sent message")
-		}
-		return
-	}
-
-	hostname := os.Getenv("HOSTNAME")
-	fmt.Println(hostname)
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
-	result, err := json.Marshal(&OutputData{Result: answer})
+	result, err := json.Marshal(&Site{
+		TunnelId: si.TunnelId,
+		PublicIp: si.PublicIp,
+		MgmtIp: si.MgmtIp,
+		IpClass: si.IpClass,
+		Hostname: si.Hostname,
+		Cost: si.Cost,
+		Email: si.Email,
+		SnmpCommunity: si.SnmpCommunity,
+		TunnelType: si.TunnelType,
+		TopologyType: si.TopologyType,
+
+	})
 	if err != nil {
 		fmt.Println(err)
 		return

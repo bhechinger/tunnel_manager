@@ -10,27 +10,19 @@
 package main
 
 import (
-	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"log"
-	"net/http"
-	"os"
-
 	"github.com/awslabs/aws-lambda-go-api-proxy/gorillamux"
 	sw "github.com/bhechinger/tunnel_manager/go"
 	_ "github.com/bhechinger/tunnel_manager/statik"
 	"github.com/rakyll/statik/fs"
-
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"log"
+	"net/http"
 )
 
 var gmux *gorillamux.GorillaMuxAdapter
 
 func init() {
-	DbMigrate()
 	log.Printf("Server cold started")
 
 	router := sw.NewRouter()
@@ -55,61 +47,4 @@ func Handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 
 func main() {
 	lambda.Start(Handler)
-}
-
-func DbMigrate() {
-	region := os.Getenv("AWS_REGION")
-	appTableName := os.Getenv("APP_TABLE_NAME")
-
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(region)},
-	)
-
-	// Create DynamoDB client
-	svc := dynamodb.New(sess)
-
-	result, err := svc.ListTables(&dynamodb.ListTablesInput{})
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	createTable := true
-	for _, n := range result.TableNames {
-		if appTableName == *n {
-			fmt.Printf("Found table: %s\n", appTableName)
-			createTable = false
-			break
-		}
-	}
-
-	if createTable {
-		fmt.Printf("Creating table '%s' in '%s'\n", appTableName, region)
-
-		input := &dynamodb.CreateTableInput{
-			AttributeDefinitions: []*dynamodb.AttributeDefinition{
-				{
-					AttributeName: aws.String("tunnelId"),
-					AttributeType: aws.String("N"),
-				},
-			},
-			KeySchema: []*dynamodb.KeySchemaElement{
-				{
-					AttributeName: aws.String("tunnelId"),
-					KeyType:       aws.String("HASH"),
-				},
-			},
-			BillingMode: aws.String(dynamodb.BillingModePayPerRequest),
-		}
-
-		_, err = svc.CreateTable(input)
-
-		if err != nil {
-			fmt.Println("Got error calling CreateTable:")
-			fmt.Println(err.Error())
-			os.Exit(1)
-		}
-
-		fmt.Println("Table created")
-	}
 }

@@ -56,9 +56,9 @@ var routes = Routes{
 	},
 
 	{
-		"PostMath",
+		"AddSite",
 		strings.ToUpper("Post"),
-		"/math",
-		PostMath,
+		"/site",
+		AddSite,
 	},
 }
