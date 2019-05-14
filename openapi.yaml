@@ -1,9 +1,9 @@
 openapi: 3.0.0
 
 info:
-  description: This is a proof of concept OpenAPI server
-  title: API POC Server
-  version: 0.0.2
+  description: Manage GRE Tunnels for the HECnet project
+  title: Tunnel Manager
+  version: 0.0.1
 
 servers:
   - url: /

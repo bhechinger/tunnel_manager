@@ -1,9 +1,9 @@
 {
   "openapi" : "3.0.0",
   "info" : {
-    "title" : "API POC Server",
-    "description" : "This is a proof of concept OpenAPI server",
-    "version" : "0.0.2"
+    "title" : "Tunnel Manager",
+    "description" : "Manage GRE Tunnels for the HECnet project",
+    "version" : "0.0.1"
   },
   "servers" : [ {
     "url" : "/"
@@ -72,7 +72,7 @@
           "mgmt_ip" : {
             "pattern" : "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$",
             "type" : "string",
-            "description" : "The IP address used by the controller to talk to the router",
+            "description" : "The IP address used by the controller to talk to the router (defaults to public_ip if unset)",
             "format" : "ipv4"
           },
           "ip_class" : {

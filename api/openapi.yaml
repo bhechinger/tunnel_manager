@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  description: This is a proof of concept OpenAPI server
-  title: API POC Server
-  version: 0.0.2
+  description: Manage GRE Tunnels for the HECnet project
+  title: Tunnel Manager
+  version: 0.0.1
 servers:
 - url: /
 paths:
@@ -64,7 +64,7 @@ components:
           pattern: ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$
           type: string
         mgmt_ip:
-          description: The IP address used by the controller to talk to the router
+          description: The IP address used by the controller to talk to the router (defaults to public_ip if unset)
           format: ipv4
           pattern: ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$
           type: string
