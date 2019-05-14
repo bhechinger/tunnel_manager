@@ -38,7 +38,7 @@
           }
         },
         "x-amazon-apigateway-integration" : {
-          "uri" : [ "", [ "arn:aws:apigateway:", "AWS::Region", ":lambda:path/2015-03-31/functions/", "ApiServerLambdaFunction.Arn", "/invocations" ] ],
+          "uri" : [ "", [ "arn:aws:apigateway:", "AWS::Region", ":lambda:path/2015-03-31/functions/", "TunnelManagerLambdaFunction.Arn", "/invocations" ] ],
           "responses" : {
             "default" : {
               "statusCode" : "200"

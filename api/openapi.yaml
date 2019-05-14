@@ -30,7 +30,7 @@ paths:
         - - 'arn:aws:apigateway:'
           - AWS::Region
           - :lambda:path/2015-03-31/functions/
-          - ApiServerLambdaFunction.Arn
+          - TunnelManagerLambdaFunction.Arn
           - /invocations
         responses:
           default:

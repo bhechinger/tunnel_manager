@@ -44,7 +44,6 @@ func NewRouter() *mux.Router {
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	// TODO: figure out what to do here. If anything.
 	fmt.Fprintf(w, "Hello World!")
 }
 

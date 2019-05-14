@@ -33,7 +33,7 @@ deploy: build
 	sls deploy
 
 clean:
-	rm bin/apiserver
+	rm bin/tunnel_manager
 
 
 # just added `gen` and `validate`

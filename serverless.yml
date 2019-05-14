@@ -1,4 +1,4 @@
-service: ApiServer
+service: TunnelManager
 
 provider:
   name: aws
@@ -13,8 +13,8 @@ package:
     - bin/**
 
 functions:
-  ApiServer:
-    handler: bin/apiserver
+  TunnelManager:
+    handler: bin/tunnel_manager
     memorySize: 256
     timeout: 30
     events:
