@@ -89,29 +89,17 @@ func DbMigrate() {
 		input := &dynamodb.CreateTableInput{
 			AttributeDefinitions: []*dynamodb.AttributeDefinition{
 				{
-					AttributeName: aws.String("year"),
+					AttributeName: aws.String("tunnelId"),
 					AttributeType: aws.String("N"),
-				},
-				{
-					AttributeName: aws.String("title"),
-					AttributeType: aws.String("S"),
 				},
 			},
 			KeySchema: []*dynamodb.KeySchemaElement{
 				{
-					AttributeName: aws.String("year"),
+					AttributeName: aws.String("tunnelId"),
 					KeyType:       aws.String("HASH"),
 				},
-				{
-					AttributeName: aws.String("title"),
-					KeyType:       aws.String("RANGE"),
-				},
 			},
-			ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
-				ReadCapacityUnits:  aws.Int64(10),
-				WriteCapacityUnits: aws.Int64(10),
-			},
-			TableName: aws.String("Movies"),
+			BillingMode: aws.String(dynamodb.BillingModePayPerRequest),
 		}
 
 		_, err = svc.CreateTable(input)
