@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  description: This is a proof of concept OpenAPI server
+  title: API POC Server
+  version: 0.0.2
+servers:
+- url: /
+paths:
+  /math:
+    post:
+      operationId: PostMath
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputData'
+        required: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OutputData'
+          description: returns the hostname of the machine
+        400:
+          description: Error (see message)
+      x-amazon-apigateway-integration:
+        uri:
+        - ""
+        - - 'arn:aws:apigateway:'
+          - AWS::Region
+          - :lambda:path/2015-03-31/functions/
+          - ApiServerLambdaFunction.Arn
+          - /invocations
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: when_no_match
+        httpMethod: POST
+        contentHandling: CONVERT_TO_TEXT
+        type: aws_proxy
+components:
+  schemas:
+    InputData:
+      example:
+        a: 6
+        b: 1
+        operation: ADD
+      properties:
+        operation:
+          description: the operation to perform
+          enum:
+          - ADD
+          - SUBTRACT
+          - MULTIPLY
+          type: string
+        a:
+          description: Value A
+          format: int64
+          type: integer
+        b:
+          description: Value B
+          format: int64
+          type: integer
+      title: Two number to do an operation on
+      type: object
+    OutputData:
+      example:
+        result: 7
+      properties:
+        result:
+          description: The Answer
+          format: int64
+          type: integer
+      title: The results of the operation
+      type: object

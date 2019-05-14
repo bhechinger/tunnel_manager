@@ -1,0 +1,34 @@
+service: ApiServer
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: dev
+  region: us-east-1
+
+package:
+  exclude:
+    - ./**
+  include:
+    - bin/**
+
+functions:
+  ApiServer:
+    handler: bin/apiserver
+    memorySize: 256
+    timeout: 30
+    events:
+      - http:
+          method: GET
+          path: /ui
+      - http:
+          method: GET
+          path: /ui/openapi.json
+
+resources:
+  Resources:
+    ApiGatewayRestApi:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: ${self:service}
+        Body: ${file(openapi.yaml)}

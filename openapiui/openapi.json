@@ -1,0 +1,99 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "API POC Server",
+    "description" : "This is a proof of concept OpenAPI server",
+    "version" : "0.0.2"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "paths" : {
+    "/math" : {
+      "post" : {
+        "operationId" : "PostMath",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/InputData"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "returns the hostname of the machine",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OutputData"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Error (see message)"
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "uri" : [ "", [ "arn:aws:apigateway:", "AWS::Region", ":lambda:path/2015-03-31/functions/", "ApiServerLambdaFunction.Arn", "/invocations" ] ],
+          "responses" : {
+            "default" : {
+              "statusCode" : "200"
+            }
+          },
+          "passthroughBehavior" : "when_no_match",
+          "httpMethod" : "POST",
+          "contentHandling" : "CONVERT_TO_TEXT",
+          "type" : "aws_proxy"
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "InputData" : {
+        "title" : "Two number to do an operation on",
+        "type" : "object",
+        "properties" : {
+          "operation" : {
+            "type" : "string",
+            "description" : "the operation to perform",
+            "enum" : [ "ADD", "SUBTRACT", "MULTIPLY" ]
+          },
+          "a" : {
+            "type" : "integer",
+            "description" : "Value A",
+            "format" : "int64"
+          },
+          "b" : {
+            "type" : "integer",
+            "description" : "Value B",
+            "format" : "int64"
+          }
+        },
+        "example" : {
+          "a" : 6,
+          "b" : 1,
+          "operation" : "ADD"
+        }
+      },
+      "OutputData" : {
+        "title" : "The results of the operation",
+        "type" : "object",
+        "properties" : {
+          "result" : {
+            "type" : "integer",
+            "description" : "The Answer",
+            "format" : "int64"
+          }
+        },
+        "example" : {
+          "result" : 7
+        }
+      }
+    }
+  }
+}
