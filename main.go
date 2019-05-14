@@ -23,6 +23,7 @@ import (
 	_ "github.com/bhechinger/tunnel_manager/statik"
 	"github.com/rakyll/statik/fs"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
