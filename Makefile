@@ -4,7 +4,7 @@
 #
 build: gen
 	statik -src=./openapi_ui
-	cd bin/ && go build -mod=vendor ../
+	go build -v -o bin/tunnel_manager
 
 # The `validate` target checks for errors and inconsistencies in
 # our specification of an API. This target can check if we're
