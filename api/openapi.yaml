@@ -16,13 +16,13 @@ paths:
               $ref: '#/components/schemas/Site'
         required: true
       responses:
-        200:
+        "200":
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Site'
           description: returns the newly created site
-        400:
+        "400":
           description: Error (see message)
       x-amazon-apigateway-integration:
         uri:
@@ -56,7 +56,6 @@ components:
       properties:
         tunnelId:
           description: The ID of the tunnel [Ignored for site creation]
-          format: int32
           type: integer
         public_ip:
           description: The public IP address of the router
@@ -64,7 +63,8 @@ components:
           pattern: ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$
           type: string
         mgmt_ip:
-          description: The IP address used by the controller to talk to the router (defaults to public_ip if unset)
+          description: The IP address used by the controller to talk to the router
+            (defaults to public_ip if unset)
           format: ipv4
           pattern: ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$
           type: string
@@ -73,14 +73,12 @@ components:
           enum:
           - 4
           - 6
-          format: int32
           type: integer
         hostname:
           description: The public DNS name of the router (for dynamic DNS lookups)
           type: string
         cost:
           description: The DECnet routing cost to assign to this tunnel [20 default]
-          format: int32
           maximum: 63
           minimum: 1
           type: integer
@@ -93,13 +91,15 @@ components:
           description: A RW SNMP community on the router to make updates with
           type: string
         tunnel_type:
-          description: The tunnel type for this tunnel. GRE is the only option currently. [ignored]
+          description: The tunnel type for this tunnel. GRE is the only option currently.
+            [ignored]
           enum:
           - GRE
           - IPSec
           type: string
         topology_type:
-          description: The topology type of this endpoint. (mesh, hub or spoke) [mesh default]
+          description: The topology type of this endpoint. (mesh, hub or spoke) [mesh
+            default]
           enum:
           - mesh
           - hub

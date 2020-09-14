@@ -1,8 +1,8 @@
 {
   "openapi" : "3.0.0",
   "info" : {
-    "title" : "Tunnel Manager",
     "description" : "Manage GRE Tunnels for the HECnet project",
+    "title" : "Tunnel Manager",
     "version" : "0.0.1"
   },
   "servers" : [ {
@@ -24,14 +24,14 @@
         },
         "responses" : {
           "200" : {
-            "description" : "returns the newly created site",
             "content" : {
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/Site"
                 }
               }
-            }
+            },
+            "description" : "returns the newly created site"
           },
           "400" : {
             "description" : "Error (see message)"
@@ -55,64 +55,6 @@
   "components" : {
     "schemas" : {
       "Site" : {
-        "title" : "Site Information",
-        "type" : "object",
-        "properties" : {
-          "tunnelId" : {
-            "type" : "integer",
-            "description" : "The ID of the tunnel [Ignored for site creation]",
-            "format" : "int32"
-          },
-          "public_ip" : {
-            "pattern" : "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$",
-            "type" : "string",
-            "description" : "The public IP address of the router",
-            "format" : "ipv4"
-          },
-          "mgmt_ip" : {
-            "pattern" : "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$",
-            "type" : "string",
-            "description" : "The IP address used by the controller to talk to the router (defaults to public_ip if unset)",
-            "format" : "ipv4"
-          },
-          "ip_class" : {
-            "type" : "integer",
-            "description" : "The IP Class of this connection (IPv4 or IPv6) [IPv4 default]",
-            "format" : "int32",
-            "enum" : [ 4, 6 ]
-          },
-          "hostname" : {
-            "type" : "string",
-            "description" : "The public DNS name of the router (for dynamic DNS lookups)"
-          },
-          "cost" : {
-            "maximum" : 63,
-            "minimum" : 1,
-            "type" : "integer",
-            "description" : "The DECnet routing cost to assign to this tunnel [20 default]",
-            "format" : "int32"
-          },
-          "email" : {
-            "pattern" : "/^(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$/",
-            "type" : "string",
-            "description" : "The email to send notifications to",
-            "format" : "email"
-          },
-          "snmp_community" : {
-            "type" : "string",
-            "description" : "A RW SNMP community on the router to make updates with"
-          },
-          "tunnel_type" : {
-            "type" : "string",
-            "description" : "The tunnel type for this tunnel. GRE is the only option currently. [ignored]",
-            "enum" : [ "GRE", "IPSec" ]
-          },
-          "topology_type" : {
-            "type" : "string",
-            "description" : "The topology type of this endpoint. (mesh, hub or spoke) [mesh default]",
-            "enum" : [ "mesh", "hub", "spoke" ]
-          }
-        },
         "example" : {
           "tunnelId" : 81,
           "public_ip" : "8.8.8.8",
@@ -124,21 +66,76 @@
           "snmp_community" : "letmein",
           "tunnel_type" : "GRE",
           "topology_type" : "mesh"
-        }
-      },
-      "OutputData" : {
-        "title" : "The results of the operation",
-        "type" : "object",
+        },
         "properties" : {
-          "result" : {
-            "type" : "integer",
-            "description" : "The Answer",
-            "format" : "int64"
+          "tunnelId" : {
+            "description" : "The ID of the tunnel [Ignored for site creation]",
+            "type" : "integer"
+          },
+          "public_ip" : {
+            "description" : "The public IP address of the router",
+            "format" : "ipv4",
+            "pattern" : "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$",
+            "type" : "string"
+          },
+          "mgmt_ip" : {
+            "description" : "The IP address used by the controller to talk to the router (defaults to public_ip if unset)",
+            "format" : "ipv4",
+            "pattern" : "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$",
+            "type" : "string"
+          },
+          "ip_class" : {
+            "description" : "The IP Class of this connection (IPv4 or IPv6) [IPv4 default]",
+            "enum" : [ 4, 6 ],
+            "type" : "integer"
+          },
+          "hostname" : {
+            "description" : "The public DNS name of the router (for dynamic DNS lookups)",
+            "type" : "string"
+          },
+          "cost" : {
+            "description" : "The DECnet routing cost to assign to this tunnel [20 default]",
+            "maximum" : 63,
+            "minimum" : 1,
+            "type" : "integer"
+          },
+          "email" : {
+            "description" : "The email to send notifications to",
+            "format" : "email",
+            "pattern" : "/^(([^<>()\\[\\]\\\\.,;:\\s@\"]+(\\.[^<>()\\[\\]\\\\.,;:\\s@\"]+)*)|(\".+\"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$/",
+            "type" : "string"
+          },
+          "snmp_community" : {
+            "description" : "A RW SNMP community on the router to make updates with",
+            "type" : "string"
+          },
+          "tunnel_type" : {
+            "description" : "The tunnel type for this tunnel. GRE is the only option currently. [ignored]",
+            "enum" : [ "GRE", "IPSec" ],
+            "type" : "string"
+          },
+          "topology_type" : {
+            "description" : "The topology type of this endpoint. (mesh, hub or spoke) [mesh default]",
+            "enum" : [ "mesh", "hub", "spoke" ],
+            "type" : "string"
           }
         },
+        "title" : "Site Information",
+        "type" : "object"
+      },
+      "OutputData" : {
         "example" : {
           "result" : 7
-        }
+        },
+        "properties" : {
+          "result" : {
+            "description" : "The Answer",
+            "format" : "int64",
+            "type" : "integer"
+          }
+        },
+        "title" : "The results of the operation",
+        "type" : "object"
       }
     }
   }

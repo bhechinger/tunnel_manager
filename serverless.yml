@@ -1,4 +1,7 @@
 service: TunnelManager
+# The Serverless dashboard doesn't currently support Go
+#org: bhechinger
+#app: tunnel-manager
 
 provider:
   name: aws
@@ -43,15 +46,20 @@ resources:
       Properties:
         TableName: ${self:custom.tableName}
         AttributeDefinitions:
-          - AttributeName: tunnelId
-            AttributeType: N
+          - AttributeName: email
+            AttributeType: S
+          - AttributeName: tunnelIP
+            AttributeType: S
         KeySchema:
-          - AttributeName: tunnelId
+          - AttributeName: email
             KeyType: HASH
+          - AttributeName: tunnelIP
+            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
     DynamoDBIamPolicy:
       Type: AWS::IAM::Policy
-      DependsOn: DynamoDbTable
+      DependsOn:
+        - DynamoDbTable
       Properties:
         PolicyName: lambda-dynamodb
         PolicyDocument:

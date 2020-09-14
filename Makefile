@@ -4,14 +4,14 @@
 #
 build: gen
 	statik -src=./openapi_ui
-	cd bin/ && go build -v ../
+	cd bin/ && go build -mod=vendor ../
 
 # The `validate` target checks for errors and inconsistencies in
 # our specification of an API. This target can check if we're
 # referencing inexistent definitions and gives us hints to where
 # to fix problems with our API in a static manner.
 validate:
-	npx openapi-generator validate -i openapi.yaml
+	openapi-generator validate -i openapi.yaml
 
 
 # The `gen` target depends on the `validate` target as
@@ -25,8 +25,8 @@ validate:
 #                       sample CLI application;
 # --name                the name of the application.
 gen: validate
-	npx openapi-generator generate -i openapi.yaml -g go-server -o .
-	npx openapi-generator generate -i openapi.yaml -g openapi -o openapiui
+	openapi-generator generate -i openapi.yaml -g go-server -o .
+	openapi-generator generate -i openapi.yaml -g openapi -o openapiui
 
 
 deploy: build
@@ -37,4 +37,4 @@ clean:
 
 
 # just added `gen` and `validate`
-.PHONY: install gen validate clean
+.PHONY: clean
