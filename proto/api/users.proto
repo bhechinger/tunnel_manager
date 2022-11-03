@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package api;
+
+import "google/protobuf/empty.proto";
+
+service User {
+  rpc List(google.protobuf.Empty) returns (UserListResponse) {}
+  rpc Get(UserGetRequest) returns (UserGetResponse) {}
+  rpc Add(UserAddRequest) returns (UserAddResponse) {}
+  rpc Delete(UserDeleteRequest) returns (UserDeleteResponse) {}
+  rpc Update(UserUpdateRequest) returns (UserUpdateResponse) {}
+}
+
+message UserData {
+  int32 ID = 1;
+  string email = 2;
+}
+
+message UserResponse {
+  bool error = 1;
+  string message = 2;
+}
+
+/* List method */
+message UserListResponse {
+  UserResponse response = 1;
+  repeated UserData users = 2;
+}
+
+/* Get method */
+message UserGetRequest {
+  oneof id_or_email {
+    int32 ID = 1;
+    string email = 2;
+  }
+}
+
+message UserGetResponse {
+  UserResponse response = 1;
+  UserData user = 2;
+}
+
+/* Add method */
+message UserAddRequest {
+  UserData user = 1;
+}
+
+message UserAddResponse {
+  UserResponse response = 1;
+}
+
+/* Delete method */
+message UserDeleteRequest {
+  oneof id_or_email {
+    int32 ID = 1;
+    string email = 2;
+  }
+}
+
+message UserDeleteResponse {
+  UserResponse Response = 1;
+}
+
+/* Update method */
+message UserUpdateRequest {
+  UserData user = 1;
+}
+
+message UserUpdateResponse {
+  UserResponse Response = 1;
+}

@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package api;
+
+import "google/protobuf/empty.proto";
+
+service Agent {
+  rpc List(google.protobuf.Empty) returns (AgentListResponse) {}
+  rpc Get(AgentGetRequest) returns (AgentGetResponse) {}
+  rpc Add(AgentAddRequest) returns (AgentAddResponse) {}
+  rpc Delete(AgentDeleteRequest) returns (AgentDeleteResponse) {}
+  rpc Update(AgentUpdateRequest) returns (AgentUpdateResponse) {}
+}
+
+message AgentData {
+  string UUID = 1;
+  int32 owner = 2;
+}
+
+message AgentResponse {
+  bool error = 1;
+  string message = 2;
+}
+
+message Agents {
+  AgentResponse response = 1;
+  repeated AgentData agent = 2;
+}
+
+/* List method */
+message AgentListResponse {
+  AgentResponse response = 1;
+  Agents agents = 2;
+}
+
+/* Get method */
+message AgentGetRequest {
+  string UUID = 1;
+}
+
+message AgentGetResponse {
+  AgentResponse response = 1;
+  AgentData agent = 2;
+}
+
+/* Add method */
+message AgentAddRequest {
+  AgentData agent = 1;
+}
+
+message AgentAddResponse {
+  AgentResponse response = 1;
+}
+
+/* Delete method */
+message AgentDeleteRequest {
+  string UUID = 1;
+}
+
+message AgentDeleteResponse {
+  AgentResponse Response = 1;
+}
+
+/* Update method */
+message AgentUpdateRequest {
+  AgentData agent = 1;
+}
+
+message AgentUpdateResponse {
+  AgentResponse Response = 1;
+}

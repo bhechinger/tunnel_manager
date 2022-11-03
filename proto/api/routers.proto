@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package api;
+
+import "google/protobuf/empty.proto";
+
+service Router {
+  rpc List(google.protobuf.Empty) returns (RouterListResponse) {}
+  rpc Get(RouterGetRequest) returns (RouterGetResponse) {}
+  rpc Add(RouterAddRequest) returns (RouterAddResponse) {}
+  rpc Delete(RouterDeleteRequest) returns (RouterDeleteResponse) {}
+  rpc Update(RouterUpdateRequest) returns (RouterUpdateResponse) {}
+}
+
+message RouterData {
+  int32 ID = 1;
+  int32 agent = 2;
+  string snmp_community = 3;
+  string ssh_username = 4;
+  string ssh_password = 5;
+  string conn_type = 6;
+  string router_type = 7;
+}
+
+message RouterResponse {
+  bool error = 1;
+  string message = 2;
+}
+
+message Routers {
+  RouterResponse response = 1;
+  repeated RouterData router = 2;
+}
+
+/* List method */
+message RouterListResponse {
+  RouterResponse response = 1;
+  Routers routers = 2;
+}
+
+/* Get method */
+message RouterGetRequest {
+  int32 ID = 1;
+}
+
+message RouterGetResponse {
+  RouterResponse response = 1;
+  RouterData router = 2;
+}
+
+/* Add method */
+message RouterAddRequest {
+  RouterData router = 1;
+}
+
+message RouterAddResponse {
+  RouterResponse response = 1;
+  int32 ID = 2;
+}
+
+/* Delete method */
+message RouterDeleteRequest {
+  int32 ID = 1;
+}
+
+message RouterDeleteResponse {
+  RouterResponse Response = 1;
+}
+
+/* Update method */
+message RouterUpdateRequest {
+  RouterData router = 1;
+}
+
+message RouterUpdateResponse {
+  RouterResponse Response = 1;
+}
