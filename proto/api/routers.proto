@@ -30,7 +30,7 @@ message RouterResponse {
 /* List method */
 message RouterListResponse {
   RouterResponse response = 1;
-  RouterData routers = 2;
+  repeated RouterData routers = 2;
 }
 
 /* Get method */
