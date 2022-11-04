@@ -35,7 +35,7 @@ message TunnelResponse {
 /* List method */
 message TunnelListResponse {
   TunnelResponse response = 1;
-  TunnelData tunnels = 2;
+  repeated TunnelData tunnels = 2;
 }
 
 /* Get method */
