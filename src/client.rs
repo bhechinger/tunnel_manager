@@ -1,21 +1,25 @@
-use agent::agent_client::AgentClient;
-use agent::AgentGetRequest;
+use api::agent_client::AgentClient;
+use api::AgentGetRequest;
+use uuid::Uuid;
 
-pub mod agent {
-    tonic::include_proto!("agent");
+pub mod api {
+    tonic::include_proto!("api");
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut client = AgentClient::connect("http://[::1]:50051").await?;
+    let id = Uuid::new_v4();
 
-    // let request = tonic::Request::new(HelloRequest {
-    //     name: "Tonic".into(),
-    // });
+    let list_response = client.list(()).await?;
+    println!("List RESPONSE={:?}", list_response);
 
-    let response = client.list().await?;
+    let get_request = tonic::Request::new(AgentGetRequest {
+        uuid: id.to_string(),
+    });
 
-    println!("RESPONSE={:?}", response);
+    let get_response = client.get(get_request).await?;
+    println!("Get RESPONSE={:?}", get_response);
 
     Ok(())
 }

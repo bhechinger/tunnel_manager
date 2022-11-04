@@ -22,15 +22,10 @@ message AgentResponse {
   string message = 2;
 }
 
-message Agents {
-  AgentResponse response = 1;
-  repeated AgentData agent = 2;
-}
-
 /* List method */
 message AgentListResponse {
   AgentResponse response = 1;
-  Agents agents = 2;
+  repeated AgentData agents = 2;
 }
 
 /* Get method */
