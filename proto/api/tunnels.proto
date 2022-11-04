@@ -32,15 +32,10 @@ message TunnelResponse {
   string message = 2;
 }
 
-message Tunnels {
-  TunnelResponse response = 1;
-  repeated TunnelData tunnel = 2;
-}
-
 /* List method */
 message TunnelListResponse {
   TunnelResponse response = 1;
-  Tunnels tunnels = 2;
+  TunnelData tunnels = 2;
 }
 
 /* Get method */

@@ -27,15 +27,10 @@ message RouterResponse {
   string message = 2;
 }
 
-message Routers {
-  RouterResponse response = 1;
-  repeated RouterData router = 2;
-}
-
 /* List method */
 message RouterListResponse {
   RouterResponse response = 1;
-  Routers routers = 2;
+  RouterData routers = 2;
 }
 
 /* Get method */
