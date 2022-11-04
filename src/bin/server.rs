@@ -4,7 +4,7 @@
 // use tokio::sync::mpsc;
 // use tokio_stream::wrappers::ReceiverStream;
 use tonic::transport::Server;
-use crate::api::agent_server::{AgentServer};
+use tunnel_manager::api::agent_server::{AgentServer};
 
 // use api::auth_server::{Auth, AuthServer};
 // use api::router_server::{Router, RouterServer};
@@ -15,7 +15,7 @@ use crate::api::agent_server::{AgentServer};
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse()?;
 
-    let agent = crate::handlers::agents::AgentService::default();
+    let agent = tunnel_manager::handlers::agents::AgentService::default();
     // let auth = AuthService::default();
     // let router = RouterService::default();
     // let tunnel = TunnelService::default();
