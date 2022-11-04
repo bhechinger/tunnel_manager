@@ -11,14 +11,11 @@ use crate::api::agent_server::{AgentServer};
 // use api::tunnel_server::{Tunnel, TunnelServer};
 // use api::user_server::{User, UserServer};
 
-mod handlers;
-mod api;
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse()?;
 
-    let agent = handlers::agents::AgentService::default();
+    let agent = crate::handlers::agents::AgentService::default();
     // let auth = AuthService::default();
     // let router = RouterService::default();
     // let tunnel = TunnelService::default();
