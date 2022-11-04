@@ -1,15 +1,11 @@
 use tonic::{Request, Response, Status};
-use api::agent_server::Agent;
-use api::{AgentListResponse};
-use api::{AgentGetRequest, AgentGetResponse};
-use api::{AgentAddRequest, AgentAddResponse};
-use api::{AgentDeleteRequest, AgentDeleteResponse};
-use api::{AgentUpdateRequest, AgentUpdateResponse};
-use api::{AgentResponse, AgentData};
-
-pub mod api {
-    tonic::include_proto!("api");
-}
+use crate::api::agent_server::Agent;
+use crate::api::{AgentListResponse};
+use crate::api::{AgentGetRequest, AgentGetResponse};
+use crate::api::{AgentAddRequest, AgentAddResponse};
+use crate::api::{AgentDeleteRequest, AgentDeleteResponse};
+use crate::api::{AgentUpdateRequest, AgentUpdateResponse};
+use crate::api::{AgentResponse, AgentData};
 
 #[derive(Debug, Default)]
 pub struct AgentService;
@@ -22,7 +18,7 @@ impl Agent for AgentService {
     ) -> Result<Response<AgentListResponse>, Status> { // Return an instance of type HelloReply
         println!("Got a list request: {:?}", request);
 
-        let reply = api::AgentListResponse {
+        let reply = AgentListResponse {
             response: Some(AgentResponse {
                 error: false,
                 message: format!("Agent list"), // We must use .into_inner() as the fields of gRPC requests and responses are private
@@ -48,7 +44,7 @@ impl Agent for AgentService {
     ) -> Result<Response<AgentGetResponse>, Status> { // Return an instance of type HelloReply
         println!("Got a get request: {:?}", request);
 
-        let reply = api::AgentGetResponse {
+        let reply = AgentGetResponse {
             response: Some(AgentResponse {
                 error: false,
                 message: format!("Agent get {}!", request.into_inner().uuid).into(),
@@ -70,7 +66,7 @@ impl Agent for AgentService {
 
         let agent = request.into_inner().agent.unwrap_or_default();
 
-        let reply = api::AgentAddResponse {
+        let reply = AgentAddResponse {
             response: Some(AgentResponse {
                 error: false,
                 message: format!("Agent add {} {}!", agent.uuid, agent.owner).into(),
@@ -86,7 +82,7 @@ impl Agent for AgentService {
     ) -> Result<Response<AgentDeleteResponse>, Status> { // Return an instance of type HelloReply
         println!("Got a delete request: {:?}", request);
 
-        let reply = api::AgentDeleteResponse {
+        let reply = AgentDeleteResponse {
             response: Some(AgentResponse {
                 error: false,
                 message: format!("Agent delete {}!", request.into_inner().uuid).into(),
@@ -104,7 +100,7 @@ impl Agent for AgentService {
 
         let agent = request.into_inner().agent.unwrap_or_default();
 
-        let reply = api::AgentUpdateResponse {
+        let reply = AgentUpdateResponse {
             response: Some(AgentResponse {
                 error: false,
                 message: format!("Agent update {}!", agent.uuid).into(),

@@ -4,7 +4,7 @@
 // use tokio::sync::mpsc;
 // use tokio_stream::wrappers::ReceiverStream;
 use tonic::transport::Server;
-use api::agent_server::{AgentServer};
+use crate::api::agent_server::{AgentServer};
 
 // use api::auth_server::{Auth, AuthServer};
 // use api::router_server::{Router, RouterServer};
@@ -12,9 +12,7 @@ use api::agent_server::{AgentServer};
 // use api::user_server::{User, UserServer};
 
 mod handlers;
-pub mod api {
-    tonic::include_proto!("api");
-}
+mod api;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
