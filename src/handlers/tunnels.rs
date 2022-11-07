@@ -1,3 +1,4 @@
+use sqlx::postgres::PgPool;
 use tonic::{Request, Response, Status};
 use crate::api::tunnel_server::Tunnel;
 use crate::api::{TunnelListResponse};
@@ -8,7 +9,17 @@ use crate::api::{TunnelUpdateRequest, TunnelUpdateResponse};
 use crate::api::{TunnelResponse, TunnelData};
 
 #[derive(Debug, Default)]
-pub struct TunnelService;
+pub struct TunnelService {
+    pool: PgPool
+}
+
+impl TunnelService {
+    pub fn new(pool: PgPool) -> Self {
+        Self {
+            pool
+        }
+    }
+}
 
 #[tonic::async_trait]
 impl Tunnel for TunnelService {

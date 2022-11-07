@@ -1,3 +1,4 @@
+use sqlx::postgres::PgPool;
 use tonic::{Request, Response, Status};
 use crate::api::router_server::Router;
 use crate::api::{RouterListResponse};
@@ -8,7 +9,17 @@ use crate::api::{RouterUpdateRequest, RouterUpdateResponse};
 use crate::api::{RouterResponse, RouterData};
 
 #[derive(Debug, Default)]
-pub struct RouterService;
+pub struct RouterService {
+    pool: PgPool
+}
+
+impl RouterService {
+    pub fn new(pool: PgPool) -> Self {
+        Self {
+            pool
+        }
+    }
+}
 
 #[tonic::async_trait]
 impl Router for RouterService {

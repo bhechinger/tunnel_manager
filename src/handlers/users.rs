@@ -1,3 +1,4 @@
+use sqlx::postgres::PgPool;
 use tonic::{Request, Response, Status};
 use crate::api::user_server::User;
 use crate::api::{UserListResponse};
@@ -8,7 +9,17 @@ use crate::api::{UserUpdateRequest, UserUpdateResponse};
 use crate::api::{UserResponse, UserData};
 
 #[derive(Debug, Default)]
-pub struct UserService;
+pub struct UserService {
+    pool: PgPool
+}
+
+impl UserService {
+    pub fn new(pool: PgPool) -> Self {
+        Self {
+            pool
+        }
+    }
+}
 
 #[tonic::async_trait]
 impl User for UserService {

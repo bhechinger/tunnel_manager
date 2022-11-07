@@ -5,10 +5,21 @@ use crate::api::{AgentGetRequest, AgentGetResponse};
 use crate::api::{AgentAddRequest, AgentAddResponse};
 use crate::api::{AgentDeleteRequest, AgentDeleteResponse};
 use crate::api::{AgentUpdateRequest, AgentUpdateResponse};
+use sqlx::postgres::PgPool;
 use crate::api::{AgentResponse, AgentData};
 
 #[derive(Debug, Default)]
-pub struct AgentService;
+pub struct AgentService {
+    pool: PgPool
+}
+
+impl AgentService {
+    pub fn new(pool: PgPool) -> Self {
+        Self {
+            pool
+        }
+    }
+}
 
 #[tonic::async_trait]
 impl Agent for AgentService {
