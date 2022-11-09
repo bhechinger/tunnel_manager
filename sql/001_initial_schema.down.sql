@@ -1,1 +1,1 @@
-DROP DATABASE hetnet;
+DROP DATABASE hecnet;

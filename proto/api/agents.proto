@@ -5,11 +5,11 @@ package api;
 import "google/protobuf/empty.proto";
 
 service Agent {
-  rpc List(google.protobuf.Empty) returns (AgentListResponse) {}
-  rpc Get(AgentGetRequest) returns (AgentGetResponse) {}
-  rpc Add(AgentAddRequest) returns (AgentAddResponse) {}
-  rpc Delete(AgentDeleteRequest) returns (AgentDeleteResponse) {}
-  rpc Update(AgentUpdateRequest) returns (AgentUpdateResponse) {}
+  rpc List(google.protobuf.Empty) returns (AgentsData) {}
+  rpc Get(AgentGetRequest) returns (AgentsData) {}
+  rpc Add(AgentData) returns (AgentData) {}
+  rpc Delete(AgentDeleteRequest) returns (AgentData) {}
+  rpc Update(AgentData) returns (AgentData) {}
 }
 
 message AgentData {
@@ -17,50 +17,20 @@ message AgentData {
   int32 owner = 2;
 }
 
-message AgentResponse {
-  bool error = 1;
-  string message = 2;
-}
-
 /* List method */
-message AgentListResponse {
-  AgentResponse response = 1;
+message AgentsData {
   repeated AgentData agents = 2;
 }
 
 /* Get method */
 message AgentGetRequest {
-  string UUID = 1;
-}
-
-message AgentGetResponse {
-  AgentResponse response = 1;
-  AgentData agent = 2;
-}
-
-/* Add method */
-message AgentAddRequest {
-  AgentData agent = 1;
-}
-
-message AgentAddResponse {
-  AgentResponse response = 1;
+  oneof uuid_or_owner {
+    string UUID = 1;
+    int32 owner = 2;
+  }
 }
 
 /* Delete method */
 message AgentDeleteRequest {
   string UUID = 1;
-}
-
-message AgentDeleteResponse {
-  AgentResponse Response = 1;
-}
-
-/* Update method */
-message AgentUpdateRequest {
-  AgentData agent = 1;
-}
-
-message AgentUpdateResponse {
-  AgentResponse Response = 1;
 }
