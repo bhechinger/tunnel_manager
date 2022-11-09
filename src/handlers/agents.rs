@@ -1,23 +1,18 @@
-use tonic::{Request, Response, Status};
+use crate::api::agent_get_request::UuidOrOwner;
 use crate::api::agent_server::Agent;
-use crate::api::{AgentListResponse};
-use crate::api::{AgentGetRequest, AgentGetResponse};
-use crate::api::{AgentAddRequest, AgentAddResponse};
-use crate::api::{AgentDeleteRequest, AgentDeleteResponse};
-use crate::api::{AgentUpdateRequest, AgentUpdateResponse};
+use crate::api::{AgentData, AgentDeleteRequest, AgentGetRequest, AgentsData};
+use crate::models::agents::Agents;
 use sqlx::postgres::PgPool;
-use crate::api::{AgentResponse, AgentData};
+use tonic::{Request, Response, Status};
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct AgentService {
-    pool: PgPool
+    pool: PgPool,
 }
 
 impl AgentService {
     pub fn new(pool: PgPool) -> Self {
-        Self {
-            pool
-        }
+        Self { pool }
     }
 }
 
@@ -26,98 +21,74 @@ impl Agent for AgentService {
     async fn list(
         &self,
         request: Request<()>, // Accept request of type HelloRequest
-    ) -> Result<Response<AgentListResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<AgentsData>, Status> {
+        // Return an instance of type HelloReply
         println!("Got a list request: {:?}", request);
 
-        let reply = AgentListResponse {
-            response: Some(AgentResponse {
-                error: false,
-                message: format!("Agent list"), // We must use .into_inner() as the fields of gRPC requests and responses are private
-            }),
-            agents: vec![
-                AgentData {
-                    uuid: "fake-uuid-1".to_string(),
-                    owner: 1,
-                },
-                AgentData {
-                    uuid: "fake-uuid-2".to_string(),
-                    owner: 2,
-                },
-            ],
-        };
+        let agents = Agents::all(&self.pool).await.unwrap();
 
-        Ok(Response::new(reply)) // Send back our formatted greeting
+        Ok(Response::new(AgentsData { agents }))
     }
 
     async fn get(
         &self,
         request: Request<AgentGetRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<AgentGetResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<AgentsData>, Status> {
+        // Return an instance of type HelloReply
         println!("Got a get request: {:?}", request);
 
-        let reply = AgentGetResponse {
-            response: Some(AgentResponse {
-                error: false,
-                message: format!("Agent get {}!", request.into_inner().uuid).into(),
-            }),
-            agent: Some(AgentData {
-                uuid: "fake-uuid-1".to_string(),
-                owner: 1,
-            }),
-        };
+        let req = request.into_inner();
 
-        Ok(Response::new(reply)) // Send back our formatted greeting
+        match req.uuid_or_owner {
+            Some(UuidOrOwner::Uuid(uuid)) => Ok(Response::new(AgentsData {
+                agents: Agents::get_by_uuid(&self.pool, uuid).await.unwrap(),
+            })),
+            Some(UuidOrOwner::Owner(owner)) => Ok(Response::new(AgentsData {
+                agents: Agents::get_by_owner(&self.pool, owner).await.unwrap(),
+            })),
+            None => Err(Status::invalid_argument("UUID or owner required")),
+        }
     }
 
     async fn add(
         &self,
-        request: Request<AgentAddRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<AgentAddResponse>, Status> { // Return an instance of type HelloReply
-        println!("Got am add request: {:?}", request);
+        request: Request<AgentData>, // Accept request of type HelloRequest
+    ) -> Result<Response<AgentData>, Status> {
+        // Return an instance of type HelloReply
+        println!("Got an add request: {:?}", request);
+        let req = request.into_inner();
+        let agent = Agents::add(&self.pool, req.uuid, req.owner).await.unwrap();
 
-        let agent = request.into_inner().agent.unwrap_or_default();
-
-        let reply = AgentAddResponse {
-            response: Some(AgentResponse {
-                error: false,
-                message: format!("Agent add {} {}!", agent.uuid, agent.owner).into(),
-            }),
-        };
-
-        Ok(Response::new(reply)) // Send back our formatted greeting
+        Ok(Response::new(agent))
     }
 
     async fn delete(
         &self,
         request: Request<AgentDeleteRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<AgentDeleteResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<AgentData>, Status> {
+        // Return an instance of type HelloReply
         println!("Got a delete request: {:?}", request);
 
-        let reply = AgentDeleteResponse {
-            response: Some(AgentResponse {
-                error: false,
-                message: format!("Agent delete {}!", request.into_inner().uuid).into(),
-            }),
-        };
+        let agent = Agents::delete(&self.pool, request.into_inner().uuid)
+            .await
+            .unwrap();
 
-        Ok(Response::new(reply)) // Send back our formatted greeting
+        Ok(Response::new(agent))
     }
 
     async fn update(
         &self,
-        request: Request<AgentUpdateRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<AgentUpdateResponse>, Status> { // Return an instance of type HelloReply
+        request: Request<AgentData>, // Accept request of type HelloRequest
+    ) -> Result<Response<AgentData>, Status> {
+        // Return an instance of type HelloReply
         println!("Got an update request: {:?}", request);
 
-        let agent = request.into_inner().agent.unwrap_or_default();
+        let req = request.into_inner();
 
-        let reply = AgentUpdateResponse {
-            response: Some(AgentResponse {
-                error: false,
-                message: format!("Agent update {}!", agent.uuid).into(),
-            }),
-        };
+        let agent = Agents::update(&self.pool, req.uuid, req.owner)
+            .await
+            .unwrap();
 
-        Ok(Response::new(reply)) // Send back our formatted greeting
+        Ok(Response::new(agent))
     }
 }
