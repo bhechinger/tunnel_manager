@@ -12,10 +12,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
     let db_url = env::var("DATABASE_URL")
-        .unwrap_or("postgres://postgres:password@localhost/test".to_string());
-    let db_max_conn = env::var("DB_MAX_CONNECTION").unwrap_or("5".to_string());
-    let grpc_host = env::var("GRPC_HOST").unwrap_or("[::1]".to_string());
-    let grpc_port = env::var("GRPC_PORT").unwrap_or("50051".to_string());
+        .unwrap_or_else(|_| "postgres://postgres:password@localhost/test".to_string());
+    let db_max_conn = env::var("DB_MAX_CONNECTION").unwrap_or_else(|_| "5".to_string());
+    let grpc_host = env::var("GRPC_HOST").unwrap_or_else(|_| "[::1]".to_string());
+    let grpc_port = env::var("GRPC_PORT").unwrap_or_else(|_| "50051".to_string());
 
     // Create a connection pool
     let pool = PgPoolOptions::new()
