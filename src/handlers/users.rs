@@ -45,12 +45,14 @@ impl User for UserService {
         match req.id_or_email {
             Some(IdOrEmail::Id(id)) => match Users::get_by_id(&self.pool, id).await {
                 Err(e) => {
+                    println!("Error getting user by id: {:?}", e);
                     return Err(sql_err_to_grpc_error(e));
                 }
                 Ok(r) => Ok(Response::new(r)),
             },
             Some(IdOrEmail::Email(email)) => match Users::get_by_email(&self.pool, email).await {
                 Err(e) => {
+                    println!("Error getting user by email: {:?}", e);
                     return Err(sql_err_to_grpc_error(e));
                 }
                 Ok(r) => Ok(Response::new(r)),
