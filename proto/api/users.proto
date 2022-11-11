@@ -6,9 +6,9 @@ import "google/protobuf/empty.proto";
 
 service User {
   rpc List(google.protobuf.Empty) returns (UsersData) {}
-  rpc Get(UserGetRequest) returns (UserData) {}
+  rpc Get(UserRequest) returns (UserData) {}
   rpc Add(UserAddRequest) returns (UserData) {}
-  rpc Delete(UserDeleteRequest) returns (UserData) {}
+  rpc Delete(UserRequest) returns (UserData) {}
   rpc Update(UserData) returns (UserData) {}
 }
 
@@ -27,15 +27,7 @@ message UsersData {
 }
 
 /* Get method */
-message UserGetRequest {
-  oneof id_or_email {
-    int32 ID = 1;
-    string email = 2;
-  }
-}
-
-/* Delete method */
-message UserDeleteRequest {
+message UserRequest {
   oneof id_or_email {
     int32 ID = 1;
     string email = 2;
