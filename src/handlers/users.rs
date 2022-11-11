@@ -21,11 +21,7 @@ impl UserService {
 #[tonic::async_trait]
 impl User for UserService {
     #[instrument]
-    async fn list(
-        &self,
-        request: Request<()>, // Accept request of type HelloRequest
-    ) -> Result<Response<UsersData>, Status> {
-        // Return an instance of type HelloReply
+    async fn list(&self, request: Request<()>) -> Result<Response<UsersData>, Status> {
         info!(message = "Got a list request", ?request);
 
         match Users::all(&self.pool).await {
@@ -41,11 +37,7 @@ impl User for UserService {
     }
 
     #[instrument]
-    async fn get(
-        &self,
-        request: Request<UserRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<UserData>, Status> {
-        // Return an instance of type HelloReply
+    async fn get(&self, request: Request<UserRequest>) -> Result<Response<UserData>, Status> {
         info!(message = "Got a get request", ?request);
 
         let req = request.into_inner();
@@ -76,11 +68,7 @@ impl User for UserService {
     }
 
     #[instrument]
-    async fn add(
-        &self,
-        request: Request<UserAddRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<UserData>, Status> {
-        // Return an instance of type HelloReply
+    async fn add(&self, request: Request<UserAddRequest>) -> Result<Response<UserData>, Status> {
         info!(message = "Got an add request", ?request);
 
         match Users::add(&self.pool, request.into_inner().email).await {
@@ -93,11 +81,7 @@ impl User for UserService {
     }
 
     #[instrument]
-    async fn delete(
-        &self,
-        request: Request<UserRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<UserData>, Status> {
-        // Return an instance of type HelloReply
+    async fn delete(&self, request: Request<UserRequest>) -> Result<Response<UserData>, Status> {
         info!(message = "Got a delete request", ?request);
 
         let req = request.into_inner();
@@ -130,11 +114,7 @@ impl User for UserService {
     }
 
     #[instrument]
-    async fn update(
-        &self,
-        request: Request<UserData>, // Accept request of type HelloRequest
-    ) -> Result<Response<UserData>, Status> {
-        // Return an instance of type HelloReply
+    async fn update(&self, request: Request<UserData>) -> Result<Response<UserData>, Status> {
         info!(message = "Got an update request", ?request);
 
         let req = request.into_inner();
