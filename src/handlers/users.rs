@@ -1,5 +1,6 @@
 use sqlx::postgres::PgPool;
 use tonic::{Request, Response, Status};
+use tracing::{error, info, instrument};
 
 use crate::api::user_request::IdOrEmail;
 use crate::api::user_server::User;
@@ -19,28 +20,33 @@ impl UserService {
 
 #[tonic::async_trait]
 impl User for UserService {
+    #[instrument]
     async fn list(
         &self,
         request: Request<()>, // Accept request of type HelloRequest
     ) -> Result<Response<UsersData>, Status> {
         // Return an instance of type HelloReply
-        println!("Got a list request: {:?}", request);
+        info!(message = "Got a list request", ?request);
 
         match Users::all(&self.pool).await {
             Ok(result) => Ok(Response::new(UsersData { users: result })),
             Err(status) => {
-                println!("Error getting list of users: {:?}", status);
+                error!(
+                    message = "Error getting list of users",
+                    status = status.message()
+                );
                 return Err(status);
             }
         }
     }
 
+    #[instrument]
     async fn get(
         &self,
         request: Request<UserRequest>, // Accept request of type HelloRequest
     ) -> Result<Response<UserData>, Status> {
         // Return an instance of type HelloReply
-        println!("Got a get request: {:?}", request);
+        info!(message = "Got a get request", ?request);
 
         let req = request.into_inner();
 
@@ -48,14 +54,20 @@ impl User for UserService {
             Some(IdOrEmail::Id(id)) => match Users::get_by_id(&self.pool, id).await {
                 Ok(result) => Ok(Response::new(result)),
                 Err(status) => {
-                    println!("Error getting user by id: {:?}", status);
+                    error!(
+                        message = "Error getting user by id",
+                        status = status.message()
+                    );
                     return Err(status);
                 }
             },
             Some(IdOrEmail::Email(email)) => match Users::get_by_email(&self.pool, email).await {
                 Ok(result) => Ok(Response::new(result)),
                 Err(status) => {
-                    println!("Error getting user by email: {:?}", status);
+                    error!(
+                        message = "Error getting user by email",
+                        status = status.message()
+                    );
                     return Err(status);
                 }
             },
@@ -63,28 +75,30 @@ impl User for UserService {
         }
     }
 
+    #[instrument]
     async fn add(
         &self,
         request: Request<UserAddRequest>, // Accept request of type HelloRequest
     ) -> Result<Response<UserData>, Status> {
         // Return an instance of type HelloReply
-        println!("Got an add request: {:?}", request);
+        info!(message = "Got an add request", ?request);
 
         match Users::add(&self.pool, request.into_inner().email).await {
             Ok(result) => Ok(Response::new(result)),
             Err(status) => {
-                println!("Error adding user: {:?}", status);
+                error!(message = "Error adding user", status = status.message());
                 return Err(status);
             }
         }
     }
 
+    #[instrument]
     async fn delete(
         &self,
         request: Request<UserRequest>, // Accept request of type HelloRequest
     ) -> Result<Response<UserData>, Status> {
         // Return an instance of type HelloReply
-        println!("Got a delete request: {:?}", request);
+        info!(message = "Got a delete request", ?request);
 
         let req = request.into_inner();
 
@@ -92,7 +106,10 @@ impl User for UserService {
             Some(IdOrEmail::Id(id)) => match Users::delete_by_id(&self.pool, id).await {
                 Ok(result) => Ok(Response::new(result)),
                 Err(status) => {
-                    println!("Error deleting user by id: {:?}", status);
+                    error!(
+                        message = "Error deleting user by id",
+                        status = status.message()
+                    );
                     return Err(status);
                 }
             },
@@ -100,7 +117,10 @@ impl User for UserService {
                 match Users::delete_by_email(&self.pool, email).await {
                     Ok(result) => Ok(Response::new(result)),
                     Err(status) => {
-                        println!("Error deleting user by email: {:?}", status);
+                        error!(
+                            message = "Error deleting user by email",
+                            status = status.message()
+                        );
                         return Err(status);
                     }
                 }
@@ -109,19 +129,23 @@ impl User for UserService {
         }
     }
 
+    #[instrument]
     async fn update(
         &self,
         request: Request<UserData>, // Accept request of type HelloRequest
     ) -> Result<Response<UserData>, Status> {
         // Return an instance of type HelloReply
-        println!("Got an update request: {:?}", request);
+        info!(message = "Got an update request", ?request);
 
         let req = request.into_inner();
 
         match Users::update(&self.pool, req.id, req.email).await {
             Ok(result) => Ok(Response::new(result)),
             Err(status) => {
-                println!("Error deleting user by email: {:?}", status);
+                error!(
+                    message = "Error deleting user by email",
+                    status = status.message()
+                );
                 return Err(status);
             }
         }
