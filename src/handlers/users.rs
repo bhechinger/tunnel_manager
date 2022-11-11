@@ -1,10 +1,10 @@
-use crate::api::user_get_request::IdOrEmail;
-use crate::api::user_server::User;
-use crate::api::{UserAddRequest, UserData, UserDeleteRequest, UserGetRequest, UsersData};
-use crate::helpers::db::sql_err_to_grpc_error;
-use crate::models::users::Users;
 use sqlx::postgres::PgPool;
 use tonic::{Request, Response, Status};
+
+use crate::api::user_request::IdOrEmail;
+use crate::api::user_server::User;
+use crate::api::{UserAddRequest, UserData, UserRequest, UsersData};
+use crate::models::users::Users;
 
 #[derive(Debug)]
 pub struct UserService {
@@ -26,16 +26,18 @@ impl User for UserService {
         // Return an instance of type HelloReply
         println!("Got a list request: {:?}", request);
 
-        // let users = Users::all(&self.pool).await.unwrap();
-        // Ok(Response::new(UsersData { users }))
-        Ok(Response::new(UsersData {
-            users: Users::all(&self.pool).await.unwrap(),
-        })) // Send back our formatted greeting
+        match Users::all(&self.pool).await {
+            Ok(result) => Ok(Response::new(UsersData { users: result })),
+            Err(status) => {
+                println!("Error getting list of users: {:?}", status);
+                return Err(status);
+            }
+        }
     }
 
     async fn get(
         &self,
-        request: Request<UserGetRequest>, // Accept request of type HelloRequest
+        request: Request<UserRequest>, // Accept request of type HelloRequest
     ) -> Result<Response<UserData>, Status> {
         // Return an instance of type HelloReply
         println!("Got a get request: {:?}", request);
@@ -44,18 +46,18 @@ impl User for UserService {
 
         match req.id_or_email {
             Some(IdOrEmail::Id(id)) => match Users::get_by_id(&self.pool, id).await {
-                Err(e) => {
-                    println!("Error getting user by id: {:?}", e);
-                    return Err(sql_err_to_grpc_error(e));
+                Ok(result) => Ok(Response::new(result)),
+                Err(status) => {
+                    println!("Error getting user by id: {:?}", status);
+                    return Err(status);
                 }
-                Ok(r) => Ok(Response::new(r)),
             },
             Some(IdOrEmail::Email(email)) => match Users::get_by_email(&self.pool, email).await {
-                Err(e) => {
-                    println!("Error getting user by email: {:?}", e);
-                    return Err(sql_err_to_grpc_error(e));
+                Ok(result) => Ok(Response::new(result)),
+                Err(status) => {
+                    println!("Error getting user by email: {:?}", status);
+                    return Err(status);
                 }
-                Ok(r) => Ok(Response::new(r)),
             },
             None => Err(Status::invalid_argument("User id or email required")),
         }
@@ -68,26 +70,43 @@ impl User for UserService {
         // Return an instance of type HelloReply
         println!("Got an add request: {:?}", request);
 
-        let user = Users::add(&self.pool, "fake-uuid".to_string())
-            .await
-            .unwrap();
-
-        Ok(Response::new(user))
+        match Users::add(&self.pool, request.into_inner().email).await {
+            Ok(result) => Ok(Response::new(result)),
+            Err(status) => {
+                println!("Error adding user: {:?}", status);
+                return Err(status);
+            }
+        }
     }
 
     async fn delete(
         &self,
-        request: Request<UserDeleteRequest>, // Accept request of type HelloRequest
+        request: Request<UserRequest>, // Accept request of type HelloRequest
     ) -> Result<Response<UserData>, Status> {
         // Return an instance of type HelloReply
         println!("Got a delete request: {:?}", request);
 
-        // let user = Users::delete(&self.pool, request.into_inner().id_or_email)
-        let user = Users::add(&self.pool, "fake-uuid".to_string())
-            .await
-            .unwrap();
+        let req = request.into_inner();
 
-        Ok(Response::new(user))
+        match req.id_or_email {
+            Some(IdOrEmail::Id(id)) => match Users::delete_by_id(&self.pool, id).await {
+                Ok(result) => Ok(Response::new(result)),
+                Err(status) => {
+                    println!("Error deleting user by id: {:?}", status);
+                    return Err(status);
+                }
+            },
+            Some(IdOrEmail::Email(email)) => {
+                match Users::delete_by_email(&self.pool, email).await {
+                    Ok(result) => Ok(Response::new(result)),
+                    Err(status) => {
+                        println!("Error deleting user by email: {:?}", status);
+                        return Err(status);
+                    }
+                }
+            }
+            None => Err(Status::invalid_argument("User id or email required")),
+        }
     }
 
     async fn update(
@@ -99,8 +118,12 @@ impl User for UserService {
 
         let req = request.into_inner();
 
-        let user = Users::update(&self.pool, req.id, req.email).await.unwrap();
-
-        Ok(Response::new(user))
+        match Users::update(&self.pool, req.id, req.email).await {
+            Ok(result) => Ok(Response::new(result)),
+            Err(status) => {
+                println!("Error deleting user by email: {:?}", status);
+                return Err(status);
+            }
+        }
     }
 }
