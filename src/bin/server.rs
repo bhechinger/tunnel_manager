@@ -9,6 +9,7 @@ use tunnel_manager::handlers::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::fmt().try_init().unwrap();
     dotenv().ok();
 
     let db_url = env::var("DATABASE_URL")
