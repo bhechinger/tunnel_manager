@@ -20,20 +20,20 @@ impl Default for Users {
     }
 }
 
-impl Into<UserData> for Users {
-    fn into(self) -> UserData {
+impl From<Users> for UserData {
+    fn from(u: Users) -> UserData {
         UserData {
-            id: self.id,
-            email: self.email.clone(),
+            id: u.id,
+            email: u.email,
         }
     }
 }
 
-impl Into<UserData> for &Users {
-    fn into(self) -> UserData {
+impl From<&Users> for UserData {
+    fn from(u: &Users) -> UserData {
         UserData {
-            id: self.id,
-            email: self.email.clone(),
+            id: u.id,
+            email: u.email.clone(),
         }
     }
 }

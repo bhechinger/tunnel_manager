@@ -17,13 +17,31 @@ impl Default for Agents {
     }
 }
 
+impl From<Agents> for AgentData {
+    fn from(u: Agents) -> AgentData {
+        AgentData {
+            uuid: u.uuid,
+            owner: u.owner,
+        }
+    }
+}
+
+impl From<&Agents> for AgentData {
+    fn from(u: &Agents) -> AgentData {
+        AgentData {
+            uuid: u.uuid.clone(),
+            owner: u.owner,
+        }
+    }
+}
+
 impl Agents {
     pub async fn all(pool: &PgPool) -> Result<Vec<AgentData>, Error> {
         let agents: Vec<Agents> =
             sqlx::query_as!(Agents, "SELECT uuid, owner FROM agents ORDER by uuid")
                 .fetch_all(pool)
                 .await?;
-        let agents_responses = agents.iter().map(|t| t.into_response()).collect();
+        let agents_responses = agents.iter().map(|t| t.into()).collect();
 
         Ok(agents_responses)
     }
@@ -36,7 +54,7 @@ impl Agents {
         )
         .fetch_all(pool)
         .await?;
-        let agent_response = agent.iter().map(|t| t.into_response()).collect();
+        let agent_response = agent.iter().map(|t| t.into()).collect();
 
         Ok(agent_response)
     }
@@ -49,7 +67,7 @@ impl Agents {
         )
         .fetch_all(pool)
         .await?;
-        let agents_responses = agents.iter().map(|t| t.into_response()).collect();
+        let agents_responses = agents.iter().map(|t| t.into()).collect();
 
         Ok(agents_responses)
     }
@@ -64,7 +82,7 @@ impl Agents {
         .fetch_one(pool)
         .await?;
 
-        Ok(agent.into_response())
+        Ok(agent.into())
     }
 
     pub async fn update(pool: &PgPool, uuid: String, owner: i32) -> Result<AgentData, Error> {
@@ -77,7 +95,7 @@ impl Agents {
         .fetch_one(pool)
         .await?;
 
-        Ok(Agents::default().into_response())
+        Ok(Agents::default().into())
     }
 
     pub async fn delete(pool: &PgPool, uuid: String) -> Result<AgentData, Error> {
@@ -85,13 +103,6 @@ impl Agents {
             .fetch_one(pool)
             .await?;
 
-        Ok(Agents::default().into_response())
-    }
-
-    fn into_response(&self) -> AgentData {
-        AgentData {
-            uuid: self.uuid.clone(),
-            owner: self.owner,
-        }
+        Ok(Agents::default().into())
     }
 }
