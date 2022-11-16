@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package api;
+
+import "google/protobuf/empty.proto";
+
+service Permission {
+  rpc List(google.protobuf.Empty) returns (PermissionsData) {}
+  rpc Get(PermissionRequest) returns (PermissionData) {}
+  rpc Add(PermissionAddRequest) returns (PermissionData) {}
+  rpc Delete(PermissionRequest) returns (PermissionData) {}
+  rpc Update(PermissionData) returns (PermissionData) {}
+}
+
+message PermissionData {
+  int32 ID = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message PermissionAddRequest {
+  string name = 1;
+  string description = 2;
+}
+
+/* List method */
+message PermissionsData {
+  repeated PermissionData permissions = 2;
+}
+
+/* Get method */
+message PermissionRequest {
+  oneof id_or_name {
+    int32 ID = 1;
+    string name = 2;
+  }
+}

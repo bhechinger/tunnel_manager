@@ -7,6 +7,7 @@ fn main() {
                 "proto/api/routers.proto",
                 "proto/api/tunnels.proto",
                 "proto/api/users.proto",
+                "proto/api/permissions.proto",
             ],
             &["proto"],
         )
