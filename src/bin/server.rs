@@ -31,6 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // let router = routers::RouterService::new(pool.clone());
     // let tunnel = tunnels::TunnelService::new(pool.clone());
     let user = users::UserService::new(pool.clone());
+    let permission = permissions::PermissionService::new(pool.clone());
 
     println!("Running on port {}", grpc_port);
 
@@ -40,6 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // .add_service(router_server::RouterServer::new(router))
         // .add_service(tunnel_server::TunnelServer::new(tunnel))
         .add_service(user_server::UserServer::new(user))
+        .add_service(permission_server::PermissionServer::new(permission))
         .serve(addr)
         .await?;
 
