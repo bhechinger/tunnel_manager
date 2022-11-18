@@ -1,19 +1,20 @@
-use sqlx::postgres::PgPool;
+use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::PgConnection;
 use tonic::{Request, Response, Status};
 use tracing::{error, info, instrument};
 
 use crate::api::permission_request::IdOrName;
 use crate::api::permission_server::Permission;
 use crate::api::{PermissionAddRequest, PermissionData, PermissionRequest, PermissionsData};
-use crate::models::permissions::Permissions;
+use crate::storage::permissions::Permissions;
 
 #[derive(Debug)]
 pub struct PermissionService {
-    pool: PgPool,
+    pool: Pool<ConnectionManager<PgConnection>>,
 }
 
 impl PermissionService {
-    pub fn new(pool: PgPool) -> Self {
+    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
         Self { pool }
     }
 }

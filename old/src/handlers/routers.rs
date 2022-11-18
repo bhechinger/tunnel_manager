@@ -1,23 +1,22 @@
-use sqlx::postgres::PgPool;
-use tonic::{Request, Response, Status};
 use crate::api::router_server::Router;
-use crate::api::{RouterListResponse};
-use crate::api::{RouterGetRequest, RouterGetResponse};
+use crate::api::RouterListResponse;
 use crate::api::{RouterAddRequest, RouterAddResponse};
+use crate::api::{RouterData, RouterResponse};
 use crate::api::{RouterDeleteRequest, RouterDeleteResponse};
+use crate::api::{RouterGetRequest, RouterGetResponse};
 use crate::api::{RouterUpdateRequest, RouterUpdateResponse};
-use crate::api::{RouterResponse, RouterData};
+use diesel::prelude::*;
+use diesel::r2d2::{ConnectionManager, Pool};
+use tonic::{Request, Response, Status};
 
 #[derive(Debug, Default)]
 pub struct RouterService {
-    pool: PgPool
+    pool: Pool<ConnectionManager<PgConnection>>,
 }
 
 impl RouterService {
-    pub fn new(pool: PgPool) -> Self {
-        Self {
-            pool
-        }
+    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
+        Self { pool }
     }
 }
 
@@ -26,7 +25,8 @@ impl Router for RouterService {
     async fn list(
         &self,
         request: Request<()>, // Accept request of type HelloRequest
-    ) -> Result<Response<RouterListResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<RouterListResponse>, Status> {
+        // Return an instance of type HelloReply
         println!("Got a list request: {:?}", request);
 
         let reply = RouterListResponse {
@@ -62,7 +62,8 @@ impl Router for RouterService {
     async fn get(
         &self,
         request: Request<RouterGetRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<RouterGetResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<RouterGetResponse>, Status> {
+        // Return an instance of type HelloReply
         println!("Got a get request: {:?}", request);
 
         let reply = RouterGetResponse {
@@ -87,7 +88,8 @@ impl Router for RouterService {
     async fn add(
         &self,
         request: Request<RouterAddRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<RouterAddResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<RouterAddResponse>, Status> {
+        // Return an instance of type HelloReply
         println!("Got am add request: {:?}", request);
 
         let router = request.into_inner().router.unwrap_or_default();
@@ -106,7 +108,8 @@ impl Router for RouterService {
     async fn delete(
         &self,
         request: Request<RouterDeleteRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<RouterDeleteResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<RouterDeleteResponse>, Status> {
+        // Return an instance of type HelloReply
         println!("Got a delete request: {:?}", request);
 
         let reply = RouterDeleteResponse {
@@ -122,7 +125,8 @@ impl Router for RouterService {
     async fn update(
         &self,
         request: Request<RouterUpdateRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<RouterUpdateResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<RouterUpdateResponse>, Status> {
+        // Return an instance of type HelloReply
         println!("Got an update request: {:?}", request);
 
         let router = request.into_inner().router.unwrap_or_default();

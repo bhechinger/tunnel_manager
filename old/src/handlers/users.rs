@@ -1,19 +1,21 @@
-use sqlx::postgres::PgPool;
+use diesel::prelude::*;
+use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::result::Error;
 use tonic::{Request, Response, Status};
 use tracing::{error, info, instrument};
 
 use crate::api::user_request::IdOrEmail;
 use crate::api::user_server::User;
 use crate::api::{UserAddRequest, UserData, UserRequest, UsersData};
-use crate::models::users::Users;
+use crate::storage::users::Users;
 
 #[derive(Debug)]
 pub struct UserService {
-    pool: PgPool,
+    pool: Pool<ConnectionManager<PgConnection>>,
 }
 
 impl UserService {
-    pub fn new(pool: PgPool) -> Self {
+    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
         Self { pool }
     }
 }
@@ -68,7 +70,7 @@ impl User for UserService {
     }
 
     #[instrument]
-    async fn add(&self, request: Request<UserAddRequest>) -> Result<Response<UserData>, Status> {
+    async fn add(&self, request: Request<UserAddRequest>) -> Result<Response<UserData>, Error> {
         info!(message = "Got an add request", ?request);
 
         match Users::add(&self.pool, request.into_inner().email).await {

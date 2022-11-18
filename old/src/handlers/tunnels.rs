@@ -1,23 +1,22 @@
-use sqlx::postgres::PgPool;
-use tonic::{Request, Response, Status};
 use crate::api::tunnel_server::Tunnel;
-use crate::api::{TunnelListResponse};
-use crate::api::{TunnelGetRequest, TunnelGetResponse};
+use crate::api::TunnelListResponse;
 use crate::api::{TunnelAddRequest, TunnelAddResponse};
+use crate::api::{TunnelData, TunnelResponse};
 use crate::api::{TunnelDeleteRequest, TunnelDeleteResponse};
+use crate::api::{TunnelGetRequest, TunnelGetResponse};
 use crate::api::{TunnelUpdateRequest, TunnelUpdateResponse};
-use crate::api::{TunnelResponse, TunnelData};
+use diesel::prelude::*;
+use diesel::r2d2::{ConnectionManager, Pool};
+use tonic::{Request, Response, Status};
 
 #[derive(Debug, Default)]
 pub struct TunnelService {
-    pool: PgPool
+    pool: Pool<ConnectionManager<PgConnection>>,
 }
 
 impl TunnelService {
-    pub fn new(pool: PgPool) -> Self {
-        Self {
-            pool
-        }
+    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
+        Self { pool }
     }
 }
 
@@ -26,7 +25,8 @@ impl Tunnel for TunnelService {
     async fn list(
         &self,
         request: Request<()>, // Accept request of type HelloRequest
-    ) -> Result<Response<TunnelListResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<TunnelListResponse>, Status> {
+        // Return an instance of type HelloReply
         println!("Got a list request: {:?}", request);
 
         let reply = TunnelListResponse {
@@ -72,7 +72,8 @@ impl Tunnel for TunnelService {
     async fn get(
         &self,
         request: Request<TunnelGetRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<TunnelGetResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<TunnelGetResponse>, Status> {
+        // Return an instance of type HelloReply
         println!("Got a get request: {:?}", request);
 
         let reply = TunnelGetResponse {
@@ -102,7 +103,8 @@ impl Tunnel for TunnelService {
     async fn add(
         &self,
         request: Request<TunnelAddRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<TunnelAddResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<TunnelAddResponse>, Status> {
+        // Return an instance of type HelloReply
         println!("Got am add request: {:?}", request);
 
         let tunnel = request.into_inner().tunnel.unwrap_or_default();
@@ -121,7 +123,8 @@ impl Tunnel for TunnelService {
     async fn delete(
         &self,
         request: Request<TunnelDeleteRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<TunnelDeleteResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<TunnelDeleteResponse>, Status> {
+        // Return an instance of type HelloReply
         println!("Got a delete request: {:?}", request);
 
         let reply = TunnelDeleteResponse {
@@ -137,7 +140,8 @@ impl Tunnel for TunnelService {
     async fn update(
         &self,
         request: Request<TunnelUpdateRequest>, // Accept request of type HelloRequest
-    ) -> Result<Response<TunnelUpdateResponse>, Status> { // Return an instance of type HelloReply
+    ) -> Result<Response<TunnelUpdateResponse>, Status> {
+        // Return an instance of type HelloReply
         println!("Got an update request: {:?}", request);
 
         let tunnel = request.into_inner().tunnel.unwrap_or_default();

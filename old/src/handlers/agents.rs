@@ -1,17 +1,18 @@
 use crate::api::agent_get_request::UuidOrOwner;
 use crate::api::agent_server::Agent;
 use crate::api::{AgentData, AgentDeleteRequest, AgentGetRequest, AgentsData};
-use crate::models::agents::Agents;
-use sqlx::postgres::PgPool;
+use crate::storage::agents::Agents;
+use diesel::prelude::*;
+use diesel::r2d2::{ConnectionManager, Pool};
 use tonic::{Request, Response, Status};
 
 #[derive(Debug)]
 pub struct AgentService {
-    pool: PgPool,
+    pool: Pool<ConnectionManager<PgConnection>>,
 }
 
 impl AgentService {
-    pub fn new(pool: PgPool) -> Self {
+    pub fn new(pool: Pool<ConnectionManager<PgConnection>>) -> Self {
         Self { pool }
     }
 }
