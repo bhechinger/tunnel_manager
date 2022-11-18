@@ -5,7 +5,7 @@ use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
 use dotenvy::dotenv;
 
-use tunnel_manager::models::posts::*;
+use tunnel_manager::models::users::*;
 
 fn main() {
     dotenv().ok();
