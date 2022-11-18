@@ -1,4 +1,4 @@
-use sqlx::Error;
+use diesel::result::Error;
 use tonic::Status;
 
 pub fn sql_err_to_grpc_error(error: Error) -> Status {

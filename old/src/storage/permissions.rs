@@ -1,12 +1,11 @@
-use sqlx::postgres::PgPool;
-use sqlx::{Postgres, QueryBuilder};
+use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::PgConnection;
 use tonic::Status;
 use tracing::{info, instrument};
 
 use crate::api::PermissionData;
-use crate::models::helpers::sql_err_to_grpc_error;
+use crate::storage::helpers::sql_err_to_grpc_error;
 
-#[derive(sqlx::FromRow, Debug, Clone)]
 pub struct Permissions {
     pub id: i32,
     pub name: String,
@@ -36,7 +35,7 @@ impl From<Permissions> for PermissionData {
 impl From<&Permissions> for PermissionData {
     fn from(p: &Permissions) -> PermissionData {
         PermissionData {
-            id: p.id,
+            id: p.id.clone(),
             name: p.name.clone(),
             description: p.description.clone(),
         }
@@ -45,7 +44,9 @@ impl From<&Permissions> for PermissionData {
 
 impl Permissions {
     #[instrument]
-    pub async fn all(pool: &PgPool) -> Result<Vec<PermissionData>, Status> {
+    pub async fn all(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+    ) -> Result<Vec<PermissionData>, Status> {
         match sqlx::query_as!(
             Permissions,
             "SELECT id, name, description FROM permissions ORDER by id"
@@ -59,7 +60,10 @@ impl Permissions {
     }
 
     #[instrument]
-    pub async fn get_by_id(pool: &PgPool, id: i32) -> Result<PermissionData, Status> {
+    pub async fn get_by_id(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        id: i32,
+    ) -> Result<PermissionData, Status> {
         match sqlx::query_as!(
             Permissions,
             "SELECT id, name, description from permissions WHERE id = $1",
@@ -74,7 +78,10 @@ impl Permissions {
     }
 
     #[instrument]
-    pub async fn get_by_name(pool: &PgPool, name: String) -> Result<PermissionData, Status> {
+    pub async fn get_by_name(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        name: String,
+    ) -> Result<PermissionData, Status> {
         match sqlx::query_as!(
             Permissions,
             "SELECT id, name, description from permissions WHERE name = $1",
@@ -90,7 +97,7 @@ impl Permissions {
 
     #[instrument]
     pub async fn add(
-        pool: &PgPool,
+        pool: &Pool<ConnectionManager<PgConnection>>,
         name: String,
         description: String,
     ) -> Result<PermissionData, Status> {
@@ -110,7 +117,7 @@ impl Permissions {
 
     #[instrument]
     pub async fn update(
-        pool: &PgPool,
+        pool: &Pool<ConnectionManager<PgConnection>>,
         id: i32,
         name: String,
         description: String,
@@ -153,7 +160,10 @@ impl Permissions {
     }
 
     #[instrument]
-    pub async fn delete_by_id(pool: &PgPool, id: i32) -> Result<PermissionData, Status> {
+    pub async fn delete_by_id(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        id: i32,
+    ) -> Result<PermissionData, Status> {
         match sqlx::query_as!(Users, "DELETE FROM permissions WHERE id = $1", id)
             .fetch_one(pool)
             .await
@@ -164,7 +174,10 @@ impl Permissions {
     }
 
     #[instrument]
-    pub async fn delete_by_name(pool: &PgPool, name: String) -> Result<PermissionData, Status> {
+    pub async fn delete_by_name(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        name: String,
+    ) -> Result<PermissionData, Status> {
         match sqlx::query_as!(Users, "DELETE FROM permissions WHERE name = $1", name)
             .fetch_one(pool)
             .await

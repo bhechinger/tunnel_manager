@@ -1,9 +1,12 @@
-extern crate dotenv;
-
-use dotenv::dotenv;
-use sqlx::postgres::PgPoolOptions;
 use std::env;
+
+use diesel::prelude::*;
+use diesel::r2d2::ConnectionManager;
+use diesel::r2d2::Pool;
+use diesel::result::Error;
+use dotenvy::dotenv;
 use tonic::transport::Server;
+
 use tunnel_manager::api::*;
 use tunnel_manager::handlers::*;
 
@@ -12,17 +15,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt().try_init().unwrap();
     dotenv().ok();
 
-    let db_url = env::var("DATABASE_URL")
-        .unwrap_or_else(|_| "postgres://postgres:password@localhost/test".to_string());
-    let db_max_conn = env::var("DB_MAX_CONNECTION").unwrap_or_else(|_| "5".to_string());
+    // let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let db_url = database_url_for_env();
+    let db_max_conn_str = env::var("DB_MAX_CONNECTION").unwrap_or_else(|_| "5".to_string());
+    let db_max_conn = db_max_conn_str.parse::<u32>().unwrap()?;
     let grpc_host = env::var("GRPC_HOST").unwrap_or_else(|_| "[::1]".to_string());
     let grpc_port = env::var("GRPC_PORT").unwrap_or_else(|_| "50051".to_string());
 
+    let manager = ConnectionManager::<PgConnection>::new(db_url);
+
     // Create a connection pool
-    let pool = PgPoolOptions::new()
-        .max_connections(db_max_conn.parse().unwrap())
-        .connect(&db_url)
-        .await?;
+    let pool = Pool::builder()
+        .test_on_check_out(true)
+        .max_size(db_max_conn)
+        .build(manager)
+        .expect("Could not build connection pool")?;
 
     let addr = format!("{}:{}", grpc_host, grpc_port).parse()?;
 
