@@ -2,7 +2,7 @@ use diesel::prelude::*;
 use dotenvy::dotenv;
 use std::env;
 
-use crate::models::posts::{NewPost, Post};
+use crate::models::users::{NewPost, Post};
 
 pub fn establish_connection() -> PgConnection {
     dotenv().ok();
