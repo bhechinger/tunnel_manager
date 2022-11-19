@@ -1,13 +1,12 @@
 use diesel::prelude::*;
 
 use crate::models::users::{NewUser, Users};
+use crate::schema::users::dsl::*;
 
-pub fn create_user(conn: &mut PgConnection, email: &str) -> Users {
-    use crate::schema::users;
+pub fn create_user(conn: &mut PgConnection, user_email: &str) -> Users {
+    let new_user = NewUser { email: user_email };
 
-    let new_user = NewUser { email };
-
-    diesel::insert_into(users::table)
+    diesel::insert_into(users)
         .values(&new_user)
         .get_result(conn)
         .expect("Error saving new post")
