@@ -13,3 +13,8 @@ pub struct User {
 pub struct NewUser<'a> {
     pub email: &'a str,
 }
+
+pub enum IdOrEmail {
+    Id(i32),
+    Email(String),
+}
