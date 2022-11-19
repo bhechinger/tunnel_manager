@@ -3,7 +3,7 @@ use diesel::prelude::*;
 use crate::schema::users;
 
 #[derive(Queryable)]
-pub struct Users {
+pub struct User {
     pub id: i32,
     pub email: String,
 }
