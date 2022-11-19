@@ -1,6 +1,6 @@
 use diesel::prelude::*;
 
-use crate::models::users::{NewUser, Users};
+use crate::models::users::{NewUser, User};
 use crate::schema::users::dsl::*;
 
 pub fn create_user(conn: &mut PgConnection, user_email: &str) -> Users {
@@ -10,4 +10,10 @@ pub fn create_user(conn: &mut PgConnection, user_email: &str) -> Users {
         .values(&new_user)
         .get_result(conn)
         .expect("Error saving new post")
+}
+
+pub fn get_users(conn: &mut PgConnection) -> Vec<User> {
+    users
+        .load::<User>(conn)
+        .expect("Error loading users")
 }

@@ -3,7 +3,7 @@ use diesel::prelude::*;
 use crate::schema::permissions;
 
 #[derive(Queryable)]
-pub struct Permissions {
+pub struct Permission {
     pub id: i32,
     pub name: String,
     pub description: String,

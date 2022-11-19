@@ -3,7 +3,7 @@ use diesel::prelude::*;
 use crate::schema::routers;
 
 #[derive(Queryable)]
-pub struct Routers {
+pub struct Router {
     pub id: i32,
     pub agent: i32,
     pub snmp_community: String,

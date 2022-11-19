@@ -3,7 +3,7 @@ use diesel::prelude::*;
 use crate::schema::agents;
 
 #[derive(Queryable)]
-pub struct Agents {
+pub struct Agent {
     pub id: i32,
     pub uuid: String,
     pub description: String,

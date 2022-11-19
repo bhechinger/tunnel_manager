@@ -3,7 +3,7 @@ use diesel::prelude::*;
 use crate::schema::tunnels;
 
 #[derive(Queryable)]
-pub struct Tunnels {
+pub struct Tunnel {
     pub id: i32,
     pub version: i32,
     pub router: i32,
