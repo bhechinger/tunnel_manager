@@ -4,10 +4,10 @@ use diesel::result::Error;
 use tonic::{Request, Response, Status};
 use tracing::{error, info, instrument};
 
+use crate::api::{UserAddRequest, UserData, UserRequest, UsersData};
 use crate::api::user_request::IdOrEmail;
 use crate::api::user_server::User;
-use crate::api::{UserAddRequest, UserData, UserRequest, UsersData};
-use crate::storage::users::Users;
+use crate::storage::users;
 
 #[derive(Debug)]
 pub struct UserService {
@@ -25,8 +25,9 @@ impl User for UserService {
     #[instrument]
     async fn list(&self, request: Request<()>) -> Result<Response<UsersData>, Status> {
         info!(message = "Got a list request", ?request);
+        let conn = &mut &self.pool.get().unwrap();
 
-        match Users::all(&self.pool).await {
+        match users::User::all(conn).await {
             Ok(result) => Ok(Response::new(UsersData { users: result })),
             Err(status) => {
                 error!(
@@ -41,25 +42,16 @@ impl User for UserService {
     #[instrument]
     async fn get(&self, request: Request<UserRequest>) -> Result<Response<UserData>, Status> {
         info!(message = "Got a get request", ?request);
+        let conn = &mut &self.pool.get().unwrap();
 
         let req = request.into_inner();
 
         match req.id_or_email {
-            Some(IdOrEmail::Id(id)) => match Users::get_by_id(&self.pool, id).await {
+            Some(id_or_email) => match users::User::get(conn, id_or_email).await {
                 Ok(result) => Ok(Response::new(result)),
                 Err(status) => {
                     error!(
                         message = "Error getting user by id",
-                        status = status.message()
-                    );
-                    return Err(status);
-                }
-            },
-            Some(IdOrEmail::Email(email)) => match Users::get_by_email(&self.pool, email).await {
-                Ok(result) => Ok(Response::new(result)),
-                Err(status) => {
-                    error!(
-                        message = "Error getting user by email",
                         status = status.message()
                     );
                     return Err(status);
