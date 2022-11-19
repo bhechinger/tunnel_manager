@@ -4,7 +4,7 @@ use diesel::r2d2::Pool;
 use dotenvy::dotenv;
 use std::env;
 use std::io::{stdin, Read};
-use tunnel_manager::storage::posts::*;
+use tunnel_manager::storage::users::*;
 
 fn main() {
     dotenv().ok();
