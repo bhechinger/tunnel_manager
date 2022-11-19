@@ -4,6 +4,7 @@ diesel::table! {
     agents (id) {
         id -> Int4,
         uuid -> Varchar,
+        description -> Varchar,
         owner -> Int4,
     }
 }
@@ -11,8 +12,8 @@ diesel::table! {
 diesel::table! {
     permission_membership (id) {
         id -> Int4,
-        permission -> Nullable<Int4>,
-        user_id -> Nullable<Int4>,
+        permission -> Int4,
+        user_id -> Int4,
     }
 }
 
@@ -27,7 +28,7 @@ diesel::table! {
 diesel::table! {
     routers (id) {
         id -> Int4,
-        agent -> Nullable<Varchar>,
+        agent -> Nullable<Int4>,
         snmp_community -> Nullable<Varchar>,
         ssh_username -> Nullable<Varchar>,
         ssh_password -> Nullable<Varchar>,
@@ -63,6 +64,7 @@ diesel::table! {
 diesel::joinable!(agents -> users (owner));
 diesel::joinable!(permission_membership -> permissions (permission));
 diesel::joinable!(permission_membership -> users (user_id));
+diesel::joinable!(routers -> agents (agent));
 diesel::joinable!(tunnels -> routers (router));
 
 diesel::allow_tables_to_appear_in_same_query!(

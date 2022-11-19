@@ -5,7 +5,7 @@ use crate::schema::routers;
 #[derive(Queryable)]
 pub struct Routers {
     pub id: i32,
-    pub agent: String,
+    pub agent: i32,
     pub snmp_community: String,
     pub ssh_username: String,
     pub ssh_password: String,
@@ -16,7 +16,7 @@ pub struct Routers {
 #[derive(Insertable)]
 #[diesel(table_name = routers)]
 pub struct NewRouter<'a> {
-    pub agent: &'a str,
+    pub agent: i32,
     pub snmp_community: &'a str,
     pub ssh_username: &'a str,
     pub ssh_password: &'a str,
