@@ -1,11 +1,9 @@
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool};
-use diesel::result::Error;
 use tonic::{Request, Response, Status};
 use tracing::{error, info, instrument};
 
 use crate::api::{UserAddRequest, UserData, UserRequest, UsersData};
-use crate::api::user_request::IdOrEmail;
 use crate::api::user_server::User;
 use crate::storage::users;
 
@@ -22,12 +20,11 @@ impl UserService {
 
 #[tonic::async_trait]
 impl User for UserService {
-    #[instrument]
+    // #[instrument]
     async fn list(&self, request: Request<()>) -> Result<Response<UsersData>, Status> {
         info!(message = "Got a list request", ?request);
-        let conn = &mut &self.pool.get().unwrap();
 
-        match users::User::all(conn).await {
+        match users::User::all(&self.pool).await {
             Ok(result) => Ok(Response::new(UsersData { users: result })),
             Err(status) => {
                 error!(
@@ -42,12 +39,11 @@ impl User for UserService {
     #[instrument]
     async fn get(&self, request: Request<UserRequest>) -> Result<Response<UserData>, Status> {
         info!(message = "Got a get request", ?request);
-        let conn = &mut &self.pool.get().unwrap();
 
         let req = request.into_inner();
 
         match req.id_or_email {
-            Some(id_or_email) => match users::User::get(conn, id_or_email).await {
+            Some(id_or_email) => match users::User::get(&self.pool, &id_or_email).await {
                 Ok(result) => Ok(Response::new(result)),
                 Err(status) => {
                     error!(
@@ -62,10 +58,10 @@ impl User for UserService {
     }
 
     #[instrument]
-    async fn add(&self, request: Request<UserAddRequest>) -> Result<Response<UserData>, Error> {
+    async fn add(&self, request: Request<UserAddRequest>) -> Result<Response<UserData>, Status> {
         info!(message = "Got an add request", ?request);
 
-        match Users::add(&self.pool, request.into_inner().email).await {
+        match users::User::add(&self.pool, request.into_inner().email.as_str()).await {
             Ok(result) => Ok(Response::new(result)),
             Err(status) => {
                 error!(message = "Error adding user", status = status.message());
@@ -81,8 +77,8 @@ impl User for UserService {
         let req = request.into_inner();
 
         match req.id_or_email {
-            Some(IdOrEmail::Id(id)) => match Users::delete_by_id(&self.pool, id).await {
-                Ok(result) => Ok(Response::new(result)),
+            Some(id_or_email) => match users::User::delete(&self.pool, id_or_email).await {
+                Ok(result) => Ok(Response::new(UserData {id: 0, email: "".to_string()} )), // I don't love this
                 Err(status) => {
                     error!(
                         message = "Error deleting user by id",
@@ -91,18 +87,6 @@ impl User for UserService {
                     return Err(status);
                 }
             },
-            Some(IdOrEmail::Email(email)) => {
-                match Users::delete_by_email(&self.pool, email).await {
-                    Ok(result) => Ok(Response::new(result)),
-                    Err(status) => {
-                        error!(
-                            message = "Error deleting user by email",
-                            status = status.message()
-                        );
-                        return Err(status);
-                    }
-                }
-            }
             None => Err(Status::invalid_argument("User id or email required")),
         }
     }
@@ -113,7 +97,7 @@ impl User for UserService {
 
         let req = request.into_inner();
 
-        match Users::update(&self.pool, req.id, req.email).await {
+        match users::User::update(&self.pool, userdata_to_data(&req)).await {
             Ok(result) => Ok(Response::new(result)),
             Err(status) => {
                 error!(
@@ -123,5 +107,12 @@ impl User for UserService {
                 return Err(status);
             }
         }
+    }
+}
+
+fn userdata_to_data(user_data: &UserData) -> users::User {
+    users::User {
+        id: user_data.id,
+        email: user_data.email,
     }
 }
