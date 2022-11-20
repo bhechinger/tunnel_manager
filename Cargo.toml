@@ -19,19 +19,7 @@ tracing-subscriber = "0.3.15"
 tonic-build = "0.8"
 
 [[bin]]
-name = "show_posts"
-doc = false
-
-[[bin]]
-name = "write_post"
-doc = false
-
-[[bin]]
-name = "delete_post"
-doc = false
-
-[[bin]]
-name = "publish_post"
+name = "server"
 doc = false
 
 [lib]

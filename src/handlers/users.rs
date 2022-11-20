@@ -20,7 +20,7 @@ impl UserService {
 
 #[tonic::async_trait]
 impl User for UserService {
-    // #[instrument]
+    #[instrument]
     async fn list(&self, request: Request<()>) -> Result<Response<UsersData>, Status> {
         info!(message = "Got a list request", ?request);
 
@@ -78,7 +78,7 @@ impl User for UserService {
 
         match req.id_or_email {
             Some(id_or_email) => match users::User::delete(&self.pool, id_or_email).await {
-                Ok(result) => Ok(Response::new(UserData {id: 0, email: "".to_string()} )), // I don't love this
+                Ok(_) => Ok(Response::new(UserData {id: 0, email: "".to_string()} )), // I don't love this
                 Err(status) => {
                     error!(
                         message = "Error deleting user by id",
@@ -113,6 +113,6 @@ impl User for UserService {
 fn userdata_to_data(user_data: &UserData) -> users::User {
     users::User {
         id: user_data.id,
-        email: user_data.email,
+        email: user_data.email.clone(),
     }
 }

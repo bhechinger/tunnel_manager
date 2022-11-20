@@ -1,6 +1,7 @@
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool};
 use tonic::Status;
+use tracing::instrument;
 
 use crate::api::UserData;
 use crate::schema::users;
@@ -49,7 +50,7 @@ impl From<&User> for UserData {
 }
 
 impl User {
-    // #[instrument]
+    #[instrument]
     pub async fn all(pool: &Pool<ConnectionManager<PgConnection>>) -> Result<Vec<UserData>, Status> {
         let conn = &mut pool.get().unwrap();
 
@@ -59,7 +60,7 @@ impl User {
         }
     }
 
-    // #[instrument]
+    #[instrument]
     pub async fn get(pool: &Pool<ConnectionManager<PgConnection>>, id_or_email: &IdOrEmail) -> Result<UserData, Status> {
         let conn = &mut pool.get().unwrap();
 
@@ -77,7 +78,7 @@ impl User {
         }
     }
 
-    // #[instrument]
+    #[instrument]
     pub async fn add(pool: &Pool<ConnectionManager<PgConnection>>, user_email: &str) -> Result<UserData, Status> {
         let new_user = NewUser { email: user_email };
         let conn = &mut pool.get().unwrap();
@@ -91,7 +92,7 @@ impl User {
         }
     }
 
-    // #[instrument]
+    #[instrument]
     pub async fn update(pool: &Pool<ConnectionManager<PgConnection>>, user_data: User) -> Result<UserData, Status> {
         let conn = &mut pool.get().unwrap();
 
@@ -104,7 +105,7 @@ impl User {
         }
     }
 
-    // #[instrument]
+    #[instrument]
     pub async fn delete(
         pool: &Pool<ConnectionManager<PgConnection>>,
         id_or_email: IdOrEmail,
