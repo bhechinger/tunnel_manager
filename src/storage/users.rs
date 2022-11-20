@@ -10,7 +10,7 @@ use crate::storage::helpers::sql_err_to_grpc_error;
 
 use crate::api::user_request::IdOrEmail;
 
-#[derive(Queryable)]
+#[derive(Queryable, Debug)]
 pub struct User {
     pub id: i32,
     pub email: String,
@@ -43,7 +43,7 @@ impl From<User> for UserData {
 impl From<&User> for UserData {
     fn from(u: &User) -> UserData {
         UserData {
-            id: u.id.clone(),
+            id: u.id,
             email: u.email.clone(),
         }
     }
@@ -114,12 +114,12 @@ impl User {
 
         match id_or_email {
             IdOrEmail::Id(user_id) => match diesel::delete(users.find(user_id)).execute(conn) {
-                Ok(results) => Ok(results.into()),
+                Ok(results) => Ok(results),
                 Err(err) => Err(sql_err_to_grpc_error(err)),
             },
             IdOrEmail::Email(user_email) => {
                 match diesel::delete(users.filter(email.eq(user_email))).execute(conn) {
-                    Ok(results) => Ok(results.into()),
+                    Ok(results) => Ok(results),
                     Err(err) => Err(sql_err_to_grpc_error(err)),
                 }
             }
