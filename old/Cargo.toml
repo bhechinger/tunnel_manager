@@ -7,7 +7,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [[bin]] # Bin to run the HelloWorld gRPC server
 name = "tunnel-manager-server"
-path = "src/bin/server.rs"
+path = "../src/bin/server.rs"
 
 [[bin]] # Bin to run the HelloWorld gRPC client
 name = "tunnel-manager-client"
