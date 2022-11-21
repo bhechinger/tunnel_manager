@@ -20,7 +20,6 @@ tonic-build = "0.8"
 
 [[bin]]
 name = "server"
-doc = false
 
 [lib]
 doc = false
