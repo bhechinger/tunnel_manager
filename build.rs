@@ -8,6 +8,7 @@ fn main() {
                 "proto/api/tunnels.proto",
                 "proto/api/users.proto",
                 "proto/api/permissions.proto",
+                "proto/api/permission_membership.proto",
             ],
             &["proto"],
         )

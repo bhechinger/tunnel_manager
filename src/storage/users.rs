@@ -10,7 +10,7 @@ use crate::storage::helpers::sql_err_to_grpc_error;
 
 use crate::api::user_request::IdOrEmail;
 
-#[derive(Queryable, Debug)]
+#[derive(Queryable, Default, Debug)]
 pub struct User {
     pub id: i32,
     pub email: String,
@@ -22,13 +22,10 @@ pub struct NewUser<'a> {
     pub email: &'a str,
 }
 
-impl Default for User {
-    fn default() -> User {
-        User {
-            id: 0,
-            email: "".to_string(),
-        }
-    }
+#[derive(AsChangeset, Default)]
+#[diesel(table_name = users)]
+pub struct UpdateUser {
+    pub email: Option<String>,
 }
 
 impl From<User> for UserData {
@@ -95,9 +92,14 @@ impl User {
     #[instrument]
     pub async fn update(pool: &Pool<ConnectionManager<PgConnection>>, user_data: User) -> Result<UserData, Status> {
         let conn = &mut pool.get().unwrap();
+        let mut update = UpdateUser::default();
+
+        if !user_data.email.is_empty() {
+            update.email = Some(user_data.email);
+        }
 
         match diesel::update(users.find(user_data.id))
-            .set(email.eq(user_data.email))
+            .set(update)
             .get_result::<User>(conn)
         {
             Ok(results) => Ok(results.into()),

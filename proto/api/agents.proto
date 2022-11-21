@@ -13,8 +13,10 @@ service Agent {
 }
 
 message AgentData {
-  string UUID = 1;
-  int32 owner = 2;
+  int32 ID = 1;
+  string UUID = 2;
+  string description = 3;
+  int32 owner = 4;
 }
 
 /* List method */
@@ -24,13 +26,17 @@ message AgentsData {
 
 /* Get method */
 message AgentGetRequest {
-  oneof uuid_or_owner {
-    string UUID = 1;
-    int32 owner = 2;
+  oneof id_uuid_or_owner {
+    int32 ID = 1;
+    string UUID = 2;
+    int32 owner = 3;
   }
 }
 
 /* Delete method */
 message AgentDeleteRequest {
-  string UUID = 1;
+  oneof id_or_uuid {
+    int32 ID = 1;
+    string UUID = 2;
+  }
 }

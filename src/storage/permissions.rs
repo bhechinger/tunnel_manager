@@ -9,7 +9,7 @@ use crate::schema::permissions;
 use crate::schema::permissions::dsl::*;
 use crate::storage::helpers::sql_err_to_grpc_error;
 
-#[derive(Queryable, Debug)]
+#[derive(Queryable, Default, Debug)]
 pub struct Permission {
     pub id: i32,
     pub name: String,
@@ -28,16 +28,6 @@ pub struct NewPermission<'a> {
 pub struct UpdatePermission {
     pub name: Option<String>,
     pub description: Option<String>,
-}
-
-impl Default for Permission {
-    fn default() -> Permission {
-        Permission {
-            id: 0,
-            name: "".to_string(),
-            description: "".to_string(),
-        }
-    }
 }
 
 impl From<Permission> for PermissionData {
@@ -106,7 +96,6 @@ impl Permission {
     #[instrument]
     pub async fn update(pool: &Pool<ConnectionManager<PgConnection>>, permission_data: Permission) -> Result<PermissionData, Status> {
         let conn = &mut pool.get().unwrap();
-
         let mut update = UpdatePermission::default();
 
         if !permission_data.name.is_empty() {

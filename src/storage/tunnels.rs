@@ -2,7 +2,7 @@ use diesel::prelude::*;
 
 use crate::schema::tunnels;
 
-#[derive(Queryable)]
+#[derive(Queryable, Default)]
 pub struct Tunnel {
     pub id: i32,
     pub version: i32,
@@ -32,4 +32,20 @@ pub struct NewTunnel<'a> {
     pub cost: i32,
     pub tunnel_type: &'a str,
     pub topology_type: &'a str,
+}
+
+#[derive(AsChangeset, Default)]
+#[diesel(table_name = tunnels)]
+pub struct UpdateTunnel {
+    pub version: Option<i32>,
+    pub router: Option<i32>,
+    pub ip: Option<String>,
+    pub dynamic_ip: Option<bool>,
+    pub ip_class: Option<i32>,
+    pub hostname: Option<String>,
+    pub description: Option<String>,
+    pub source: Option<String>,
+    pub cost: Option<i32>,
+    pub tunnel_type: Option<String>,
+    pub topology_type: Option<String>,
 }
