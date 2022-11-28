@@ -8,7 +8,6 @@ use crate::api::UserData;
 use crate::schema::users;
 use crate::schema::users::dsl::*;
 use crate::storage::helpers::sql_err_to_grpc_error;
-use crate::storage::users;
 
 #[derive(Queryable, Default, Debug)]
 pub struct User {
