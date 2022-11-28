@@ -6,16 +6,16 @@ import "google/protobuf/empty.proto";
 
 service Agent {
   rpc List(google.protobuf.Empty) returns (AgentsData) {}
-  rpc Get(AgentGetRequest) returns (AgentsData) {}
+  rpc Get(AgentRequest) returns (AgentsData) {}
   rpc Add(AgentData) returns (AgentData) {}
-  rpc Delete(AgentDeleteRequest) returns (AgentData) {}
+  rpc Delete(AgentRequest) returns (AgentData) {}
   rpc Update(AgentData) returns (AgentData) {}
 }
 
 message AgentData {
-  int32 ID = 1;
+  optional int32 ID = 1;
   string UUID = 2;
-  string description = 3;
+  optional string description = 3;
   int32 owner = 4;
 }
 
@@ -25,18 +25,10 @@ message AgentsData {
 }
 
 /* Get method */
-message AgentGetRequest {
+message AgentRequest {
   oneof id_uuid_or_owner {
     int32 ID = 1;
     string UUID = 2;
     int32 owner = 3;
-  }
-}
-
-/* Delete method */
-message AgentDeleteRequest {
-  oneof id_or_uuid {
-    int32 ID = 1;
-    string UUID = 2;
   }
 }

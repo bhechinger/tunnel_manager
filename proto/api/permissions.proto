@@ -7,20 +7,15 @@ import "google/protobuf/empty.proto";
 service Permission {
   rpc List(google.protobuf.Empty) returns (PermissionsData) {}
   rpc Get(PermissionRequest) returns (PermissionData) {}
-  rpc Add(PermissionAddRequest) returns (PermissionData) {}
+  rpc Add(PermissionData) returns (PermissionData) {}
   rpc Delete(PermissionRequest) returns (PermissionData) {}
   rpc Update(PermissionData) returns (PermissionData) {}
 }
 
 message PermissionData {
-  int32 ID = 1;
+  optional int32 ID = 1;
   string name = 2;
   string description = 3;
-}
-
-message PermissionAddRequest {
-  string name = 1;
-  string description = 2;
 }
 
 /* List method */

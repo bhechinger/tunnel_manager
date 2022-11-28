@@ -3,8 +3,7 @@ use diesel::r2d2::{ConnectionManager, Pool};
 use tonic::Status;
 use tracing::instrument;
 
-use crate::api::agent_delete_request::IdOrUuid;
-use crate::api::agent_get_request::IdUuidOrOwner;
+use crate::api::agent_request::IdUuidOrOwner;
 use crate::api::AgentData;
 use crate::schema::agents;
 use crate::schema::agents::dsl::*;
@@ -37,9 +36,9 @@ pub struct UpdateAgent {
 impl From<Agent> for AgentData {
     fn from(a: Agent) -> AgentData {
         AgentData {
-            id: a.id,
+            id: Some(a.id),
             uuid: a.uuid,
-            description: a.description,
+            description: Some(a.description),
             owner: a.owner,
         }
     }
@@ -48,9 +47,9 @@ impl From<Agent> for AgentData {
 impl From<&Agent> for AgentData {
     fn from(a: &Agent) -> AgentData {
         AgentData {
-            id: a.id,
+            id: Some(a.id),
             uuid: a.uuid.clone(),
-            description: a.description.clone(),
+            description: Some(a.description.clone()),
             owner: a.owner,
         }
     }
@@ -134,17 +133,23 @@ impl Agent {
     #[instrument]
     pub async fn delete(
         pool: &Pool<ConnectionManager<PgConnection>>,
-        id_or_uuid: IdOrUuid,
+        id_uuid_or_owner: IdUuidOrOwner,
     ) -> Result<usize, Status> {
         let conn = &mut pool.get().unwrap();
 
-        match id_or_uuid {
-            IdOrUuid::Id(agent_id) => match diesel::delete(agents.find(agent_id)).execute(conn) {
+        match id_uuid_or_owner {
+            IdUuidOrOwner::Id(agent_id) => match diesel::delete(agents.find(agent_id)).execute(conn) {
                 Ok(results) => Ok(results),
                 Err(err) => Err(sql_err_to_grpc_error(err)),
             },
-            IdOrUuid::Uuid(agent_uuid) => {
+            IdUuidOrOwner::Uuid(agent_uuid) => {
                 match diesel::delete(agents.filter(uuid.eq(agent_uuid))).execute(conn) {
+                    Ok(results) => Ok(results),
+                    Err(err) => Err(sql_err_to_grpc_error(err)),
+                }
+            }
+            IdUuidOrOwner::Owner(owner_id) => {
+                match diesel::delete(agents.filter(owner.eq(owner_id))).execute(conn) {
                     Ok(results) => Ok(results),
                     Err(err) => Err(sql_err_to_grpc_error(err)),
                 }

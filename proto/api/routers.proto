@@ -5,68 +5,30 @@ package api;
 import "google/protobuf/empty.proto";
 
 service Router {
-  rpc List(google.protobuf.Empty) returns (RouterListResponse) {}
-  rpc Get(RouterGetRequest) returns (RouterGetResponse) {}
-  rpc Add(RouterAddRequest) returns (RouterAddResponse) {}
-  rpc Delete(RouterDeleteRequest) returns (RouterDeleteResponse) {}
-  rpc Update(RouterUpdateRequest) returns (RouterUpdateResponse) {}
+  rpc List(google.protobuf.Empty) returns (RoutersData) {}
+  rpc Get(RouterRequest) returns (RoutersData) {}
+  rpc Add(RouterData) returns (RouterData) {}
+  rpc Delete(RouterRequest) returns (RouterData) {}
+  rpc Update(RouterData) returns (RouterData) {}
 }
 
 message RouterData {
-  int32 ID = 1;
+  optional int32 ID = 1;
   int32 agent = 2;
-  string snmp_community = 3;
-  string ssh_username = 4;
-  string ssh_password = 5;
-  string conn_type = 6;
-  string router_type = 7;
+  optional string snmp_community = 3;
+  optional string ssh_username = 4;
+  optional string ssh_password = 5;
+  optional string conn_type = 6;
+  optional string router_type = 7;
 }
 
-message RouterResponse {
-  bool error = 1;
-  string message = 2;
+message RoutersData {
+  repeated RouterData routers = 1;
 }
 
-/* List method */
-message RouterListResponse {
-  RouterResponse response = 1;
-  repeated RouterData routers = 2;
-}
-
-/* Get method */
-message RouterGetRequest {
-  int32 ID = 1;
-}
-
-message RouterGetResponse {
-  RouterResponse response = 1;
-  RouterData router = 2;
-}
-
-/* Add method */
-message RouterAddRequest {
-  RouterData router = 1;
-}
-
-message RouterAddResponse {
-  RouterResponse response = 1;
-  int32 ID = 2;
-}
-
-/* Delete method */
-message RouterDeleteRequest {
-  int32 ID = 1;
-}
-
-message RouterDeleteResponse {
-  RouterResponse Response = 1;
-}
-
-/* Update method */
-message RouterUpdateRequest {
-  RouterData router = 1;
-}
-
-message RouterUpdateResponse {
-  RouterResponse Response = 1;
+message RouterRequest {
+  oneof id_or_agent {
+    int32 ID = 1;
+    int32 agent = 2;
+  }
 }

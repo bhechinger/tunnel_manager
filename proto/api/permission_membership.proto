@@ -8,20 +8,15 @@ service PermissionMembership {
   rpc List(google.protobuf.Empty) returns (PermissionMembershipsData) {}
   rpc GetPermissionMembers(PermissionMembershipRequest) returns (PermissionMembershipData) {}
   rpc GetUserPermissions(PermissionMembershipRequest) returns (PermissionMembershipData) {}
-  rpc Add(PermissionMembershipAddRequest) returns (PermissionMembershipData) {}
+  rpc Add(PermissionMembershipData) returns (PermissionMembershipData) {}
   rpc Delete(PermissionMembershipRequest) returns (PermissionMembershipData) {}
   rpc Update(PermissionMembershipData) returns (PermissionMembershipData) {}
 }
 
 message PermissionMembershipData {
-  int32 ID = 1;
+  optional int32 ID = 1;
   int32 permission = 2;
   int32 userID = 3;
-}
-
-message PermissionMembershipAddRequest {
-  int32 permission = 1;
-  int32 userID = 2;
 }
 
 /* List method */
@@ -31,7 +26,7 @@ message PermissionMembershipsData {
 
 /* Get method */
 message PermissionMembershipRequest {
-  oneof id_or_permission_or_userid {
+  oneof id_permission_or_userid {
     int32 ID = 1;
     int32 permission = 2;
     int32 userID = 3;

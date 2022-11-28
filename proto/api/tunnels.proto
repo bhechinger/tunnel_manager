@@ -5,74 +5,37 @@ package api;
 import "google/protobuf/empty.proto";
 
 service Tunnel {
-  rpc List(google.protobuf.Empty) returns (TunnelListResponse) {}
-  rpc Get(TunnelGetRequest) returns (TunnelGetResponse) {}
-  rpc Add(TunnelAddRequest) returns (TunnelAddResponse) {}
-  rpc Delete(TunnelDeleteRequest) returns (TunnelDeleteResponse) {}
-  rpc Update(TunnelUpdateRequest) returns (TunnelUpdateResponse) {}
+  rpc List(google.protobuf.Empty) returns (TunnelsData) {}
+  rpc Get(TunnelRequest) returns (TunnelsData) {}
+  rpc Add(TunnelData) returns (TunnelData) {}
+  rpc Delete(TunnelRequest) returns (TunnelData) {}
+  rpc Update(TunnelData) returns (TunnelData) {}
 }
 
 message TunnelData {
-  int32 ID = 1;
-  int32 version = 2;
+  optional int32 ID = 1;
+  optional int32 version = 2;
   int32 router = 3;
   string IP = 4;
-  bool dynamic_ip = 5;
-  string ip_class = 6;
+  optional bool dynamic_ip = 5;
+  optional int32 ip_class = 6;
   string hostname = 7;
   string description = 8;
   string source = 9;
-  int32 cost = 10;
-  string tunnel_type = 11;
-  string topology_type = 12;
-}
-
-message TunnelResponse {
-  bool error = 1;
-  string message = 2;
+  optional int32 cost = 10;
+  optional string tunnel_type = 11;
+  optional string topology_type = 12;
 }
 
 /* List method */
-message TunnelListResponse {
-  TunnelResponse response = 1;
-  repeated TunnelData tunnels = 2;
+message TunnelsData {
+  repeated TunnelData tunnels = 1;
 }
 
 /* Get method */
-message TunnelGetRequest {
-  int32 ID = 1;
-}
-
-message TunnelGetResponse {
-  TunnelResponse response = 1;
-  TunnelData tunnel = 2;
-}
-
-/* Add method */
-message TunnelAddRequest {
-  TunnelData tunnel = 1;
-}
-
-message TunnelAddResponse {
-  TunnelResponse response = 1;
-  int32 ID = 2;
-}
-
-/* Delete method */
-message TunnelDeleteRequest {
-  int32 ID = 1;
-}
-
-message TunnelDeleteResponse {
-  TunnelResponse Response = 1;
-}
-
-/* Update method */
-message TunnelUpdateRequest {
-  TunnelData tunnel = 1;
-}
-
-message TunnelUpdateResponse {
-  TunnelResponse Response = 1;
-  int32 version = 2;
+message TunnelRequest {
+  oneof id_or_router {
+    int32 ID = 1;
+    int32 router = 2;
+  }
 }
