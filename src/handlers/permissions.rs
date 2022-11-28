@@ -63,6 +63,14 @@ impl Permission for PermissionService {
 
         let req = request.into_inner();
 
+        if req.name.is_empty() {
+            return Err(Status::invalid_argument("Permission name is required"));
+        }
+
+        if req.description.is_empty() {
+            return Err(Status::invalid_argument("Permission description is required"));
+        }
+
         match permissions::Permission::add(&self.pool, req.name.as_str(), req.description.as_str()).await {
             Ok(result) => Ok(Response::new(result)),
             Err(status) => {
@@ -99,7 +107,7 @@ impl Permission for PermissionService {
 
         let req = request.into_inner();
 
-        match permissions::Permission::update(&self.pool, permissiondata_to_data(&req)).await {
+        match permissions::Permission::update(&self.pool, req).await {
             Ok(result) => Ok(Response::new(result)),
             Err(status) => {
                 error!(
@@ -109,13 +117,5 @@ impl Permission for PermissionService {
                 return Err(status);
             }
         }
-    }
-}
-
-fn permissiondata_to_data(permission_data: &PermissionData) -> permissions::Permission {
-    permissions::Permission {
-        id: permission_data.id.unwrap_or_default(),
-        name: permission_data.name.clone(),
-        description: permission_data.description.clone(),
     }
 }

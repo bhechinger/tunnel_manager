@@ -3,12 +3,12 @@ use diesel::r2d2::{ConnectionManager, Pool};
 use tonic::Status;
 use tracing::instrument;
 
+use crate::api::user_request::IdOrEmail;
 use crate::api::UserData;
 use crate::schema::users;
 use crate::schema::users::dsl::*;
 use crate::storage::helpers::sql_err_to_grpc_error;
-
-use crate::api::user_request::IdOrEmail;
+use crate::storage::users;
 
 #[derive(Queryable, Default, Debug)]
 pub struct User {
@@ -90,15 +90,19 @@ impl User {
     }
 
     #[instrument]
-    pub async fn update(pool: &Pool<ConnectionManager<PgConnection>>, user_data: User) -> Result<UserData, Status> {
+    pub async fn update(pool: &Pool<ConnectionManager<PgConnection>>, user_data: UserData) -> Result<UserData, Status> {
         let conn = &mut pool.get().unwrap();
         let mut update = UpdateUser::default();
+
+        if user_data.id.is_none() {
+            return Err(Status::invalid_argument("User id is required"));
+        }
 
         if !user_data.email.is_empty() {
             update.email = Some(user_data.email);
         }
 
-        match diesel::update(users.find(user_data.id))
+        match diesel::update(users.find(user_data.id.unwrap()))
             .set(update)
             .get_result::<User>(conn)
         {
