@@ -135,30 +135,22 @@ impl Tunnel {
     #[instrument]
     pub async fn add(
         pool: &Pool<ConnectionManager<PgConnection>>,
-        new_version: i32,
-        new_router: i32,
-        new_ip: &str,
-        new_dynamic_ip: bool,
-        new_ip_class: i32,
-        new_description: &str,
-        new_source: &str,
-        new_cost: i32,
-        new_tunnel_type: &str,
-        new_hostname: &str,
-        new_topology_type: &str,
+        tunnel_data: TunnelData,
     ) -> Result<TunnelData, Status> {
+        let tun_type = tunnel_data.tunnel_type.unwrap_or_default();
+        let top_type = tunnel_data.topology_type.unwrap_or_default();
         let new_user = NewTunnel {
-            version: new_version,
-            router: new_router,
-            ip: new_ip,
-            dynamic_ip: new_dynamic_ip,
-            ip_class: new_ip_class,
-            description: new_description,
-            source: new_source,
-            cost: new_cost,
-            tunnel_type: new_tunnel_type,
-            hostname: new_hostname,
-            topology_type: new_topology_type,
+            version: tunnel_data.version.unwrap_or_default(),
+            router: tunnel_data.router,
+            ip: tunnel_data.ip.as_str(),
+            dynamic_ip: tunnel_data.dynamic_ip.unwrap_or_default(),
+            ip_class: tunnel_data.ip_class.unwrap_or_default(),
+            description: tunnel_data.description.as_str(),
+            source: tunnel_data.source.as_str(),
+            cost: tunnel_data.cost.unwrap_or_default(),
+            tunnel_type: tun_type.as_str(),
+            hostname: tunnel_data.hostname.as_str(),
+            topology_type: top_type.as_str(),
         };
         let conn = &mut pool.get().unwrap();
 
