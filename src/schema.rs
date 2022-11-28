@@ -28,7 +28,7 @@ diesel::table! {
 diesel::table! {
     routers (id) {
         id -> Int4,
-        agent -> Nullable<Int4>,
+        agent -> Int4,
         snmp_community -> Nullable<Varchar>,
         ssh_username -> Nullable<Varchar>,
         ssh_password -> Nullable<Varchar>,
@@ -41,7 +41,7 @@ diesel::table! {
     tunnels (id) {
         id -> Int4,
         version -> Int4,
-        router -> Nullable<Int4>,
+        router -> Int4,
         ip -> Varchar,
         dynamic_ip -> Bool,
         ip_class -> Int4,

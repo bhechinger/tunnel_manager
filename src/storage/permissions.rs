@@ -33,7 +33,7 @@ pub struct UpdatePermission {
 impl From<Permission> for PermissionData {
     fn from(p: Permission) -> PermissionData {
         PermissionData {
-            id: p.id,
+            id: Some(p.id),
             name: p.name,
             description: p.description,
         }
@@ -43,7 +43,7 @@ impl From<Permission> for PermissionData {
 impl From<&Permission> for PermissionData {
     fn from(p: &Permission) -> PermissionData {
         PermissionData {
-            id: p.id,
+            id: Some(p.id),
             name: p.name.clone(),
             description: p.description.clone(),
         }

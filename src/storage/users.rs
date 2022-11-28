@@ -31,7 +31,7 @@ pub struct UpdateUser {
 impl From<User> for UserData {
     fn from(u: User) -> UserData {
         UserData {
-            id: u.id,
+            id: Some(u.id),
             email: u.email,
         }
     }
@@ -40,7 +40,7 @@ impl From<User> for UserData {
 impl From<&User> for UserData {
     fn from(u: &User) -> UserData {
         UserData {
-            id: u.id,
+            id: Some(u.id),
             email: u.email.clone(),
         }
     }

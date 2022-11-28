@@ -3,7 +3,7 @@ use diesel::r2d2::{ConnectionManager, Pool};
 use tonic::{Request, Response, Status};
 use tracing::{error, info, instrument};
 
-use crate::api::{PermissionAddRequest, PermissionData, PermissionRequest, PermissionsData};
+use crate::api::{PermissionData, PermissionRequest, PermissionsData};
 use crate::api::permission_server::Permission;
 use crate::storage::permissions;
 
@@ -58,7 +58,7 @@ impl Permission for PermissionService {
     }
 
     #[instrument]
-    async fn add(&self, request: Request<PermissionAddRequest>) -> Result<Response<PermissionData>, Status> {
+    async fn add(&self, request: Request<PermissionData>) -> Result<Response<PermissionData>, Status> {
         info!(message = "Got an add request", ?request);
 
         let req = request.into_inner();
@@ -80,7 +80,7 @@ impl Permission for PermissionService {
 
         match req.id_or_name {
             Some(id_or_name) => match permissions::Permission::delete(&self.pool, id_or_name).await {
-                Ok(_) => Ok(Response::new(PermissionData { id: 0, name: "".to_string(), description: "".to_string() })), // I don't love this
+                Ok(_) => Ok(Response::new(PermissionData { id: Some(0), name: "".to_string(), description: "".to_string() })), // I don't love this
                 Err(status) => {
                     error!(
                         message = "Error deleting permission by id",
@@ -114,7 +114,7 @@ impl Permission for PermissionService {
 
 fn permissiondata_to_data(permission_data: &PermissionData) -> permissions::Permission {
     permissions::Permission {
-        id: permission_data.id,
+        id: permission_data.id.unwrap_or_default(),
         name: permission_data.name.clone(),
         description: permission_data.description.clone(),
     }

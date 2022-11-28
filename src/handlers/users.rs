@@ -3,7 +3,7 @@ use diesel::r2d2::{ConnectionManager, Pool};
 use tonic::{Request, Response, Status};
 use tracing::{error, info, instrument};
 
-use crate::api::{UserAddRequest, UserData, UserRequest, UsersData};
+use crate::api::{UserData, UserRequest, UsersData};
 use crate::api::user_server::User;
 use crate::storage::users;
 
@@ -58,7 +58,7 @@ impl User for UserService {
     }
 
     #[instrument]
-    async fn add(&self, request: Request<UserAddRequest>) -> Result<Response<UserData>, Status> {
+    async fn add(&self, request: Request<UserData>) -> Result<Response<UserData>, Status> {
         info!(message = "Got an add request", ?request);
 
         match users::User::add(&self.pool, request.into_inner().email.as_str()).await {
@@ -78,7 +78,7 @@ impl User for UserService {
 
         match req.id_or_email {
             Some(id_or_email) => match users::User::delete(&self.pool, id_or_email).await {
-                Ok(_) => Ok(Response::new(UserData {id: 0, email: "".to_string()} )), // I don't love this
+                Ok(_) => Ok(Response::new(UserData { id: Some(0), email: "".to_string() })), // I don't love this
                 Err(status) => {
                     error!(
                         message = "Error deleting user by id",
@@ -112,7 +112,7 @@ impl User for UserService {
 
 fn userdata_to_data(user_data: &UserData) -> users::User {
     users::User {
-        id: user_data.id,
+        id: user_data.id.unwrap_or_default(),
         email: user_data.email.clone(),
     }
 }
