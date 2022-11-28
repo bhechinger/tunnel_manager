@@ -61,7 +61,13 @@ impl User for UserService {
     async fn add(&self, request: Request<UserData>) -> Result<Response<UserData>, Status> {
         info!(message = "Got an add request", ?request);
 
-        match users::User::add(&self.pool, request.into_inner().email.as_str()).await {
+        let req = request.into_inner();
+
+        if req.email.is_empty() {
+            return Err(Status::invalid_argument("email is required"));
+        }
+
+        match users::User::add(&self.pool, req.email.as_str()).await {
             Ok(result) => Ok(Response::new(result)),
             Err(status) => {
                 error!(message = "Error adding user", status = status.message());
@@ -96,8 +102,12 @@ impl User for UserService {
         info!(message = "Got an update request", ?request);
 
         let req = request.into_inner();
+        if req.id.is_none() {
+            return Err(Status::invalid_argument("User id required"));
+        }
 
-        match users::User::update(&self.pool, userdata_to_data(&req)).await {
+        // match users::User::update(&self.pool, userdata_to_data(&req)).await {
+        match users::User::update(&self.pool, req).await {
             Ok(result) => Ok(Response::new(result)),
             Err(status) => {
                 error!(
@@ -107,12 +117,5 @@ impl User for UserService {
                 return Err(status);
             }
         }
-    }
-}
-
-fn userdata_to_data(user_data: &UserData) -> users::User {
-    users::User {
-        id: user_data.id.unwrap_or_default(),
-        email: user_data.email.clone(),
     }
 }

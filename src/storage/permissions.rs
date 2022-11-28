@@ -94,9 +94,13 @@ impl Permission {
     }
 
     #[instrument]
-    pub async fn update(pool: &Pool<ConnectionManager<PgConnection>>, permission_data: Permission) -> Result<PermissionData, Status> {
+    pub async fn update(pool: &Pool<ConnectionManager<PgConnection>>, permission_data: PermissionData) -> Result<PermissionData, Status> {
         let conn = &mut pool.get().unwrap();
         let mut update = UpdatePermission::default();
+
+        if permission_data.id.is_none() {
+            return Err(Status::invalid_argument("Permission id is required"));
+        }
 
         if !permission_data.name.is_empty() {
             update.name = Some(permission_data.name);
@@ -106,7 +110,7 @@ impl Permission {
             update.description = Some(permission_data.description)
         }
 
-        match diesel::update(permissions.find(permission_data.id))
+        match diesel::update(permissions.find(permission_data.id.unwrap()))
             .set(update)
             .get_result::<Permission>(conn)
         {
