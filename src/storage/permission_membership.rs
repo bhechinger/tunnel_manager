@@ -50,10 +50,11 @@ impl From<&PermissionMembership> for PermissionMembershipData {
     }
 }
 
-
 impl PermissionMembership {
     #[instrument]
-    pub async fn all(pool: &Pool<ConnectionManager<PgConnection>>) -> Result<Vec<PermissionMembershipData>, Status> {
+    pub async fn all(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+    ) -> Result<Vec<PermissionMembershipData>, Status> {
         let conn = &mut pool.get().unwrap();
 
         match permission_membership.load::<PermissionMembership>(conn) {
@@ -63,23 +64,34 @@ impl PermissionMembership {
     }
 
     #[instrument]
-    pub async fn get(pool: &Pool<ConnectionManager<PgConnection>>, id_permission_or_userid: &IdPermissionOrUserid) -> Result<PermissionMembershipData,
-        Status> {
+    pub async fn get(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        id_permission_or_userid: &IdPermissionOrUserid,
+    ) -> Result<Vec<PermissionMembershipData>, Status> {
         let conn = &mut pool.get().unwrap();
 
         match id_permission_or_userid {
-            IdPermissionOrUserid::Id(pm_id) => match permission_membership.find(pm_id).first::<PermissionMembership>(conn) {
+            IdPermissionOrUserid::Id(pm_id) => match permission_membership
+                .find(pm_id)
+                .load::<PermissionMembership>(conn)
+            {
                 Ok(results) => Ok(results.into()),
                 Err(err) => Err(sql_err_to_grpc_error(err)),
             },
             IdPermissionOrUserid::Permission(pm_permission) => {
-                match permission_membership.filter(permission.eq(pm_permission)).first::<PermissionMembership>(conn) {
+                match permission_membership
+                    .filter(permission.eq(pm_permission))
+                    .load::<PermissionMembership>(conn)
+                {
                     Ok(results) => Ok(results.into()),
                     Err(err) => Err(sql_err_to_grpc_error(err)),
                 }
             }
             IdPermissionOrUserid::UserId(pm_userid) => {
-                match permission_membership.filter(user_id.eq(pm_userid)).first::<PermissionMembership>(conn) {
+                match permission_membership
+                    .filter(user_id.eq(pm_userid))
+                    .load::<PermissionMembership>(conn)
+                {
                     Ok(results) => Ok(results.into()),
                     Err(err) => Err(sql_err_to_grpc_error(err)),
                 }
@@ -88,9 +100,14 @@ impl PermissionMembership {
     }
 
     #[instrument]
-    pub async fn add(pool: &Pool<ConnectionManager<PgConnection>>, pm_name: i32, pm_description: i32) -> Result<PermissionMembershipData,
-        Status> {
-        let new_user = NewPermissionMembership { permission: pm_name, user_id: pm_description };
+    pub async fn add(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        pm_data: PermissionMembershipData,
+    ) -> Result<PermissionMembershipData, Status> {
+        let new_user = NewPermissionMembership {
+            permission: pm_data.permission,
+            user_id: pm_data.user_id,
+        };
         let conn = &mut pool.get().unwrap();
 
         match diesel::insert_into(permission_membership)
@@ -103,8 +120,10 @@ impl PermissionMembership {
     }
 
     #[instrument]
-    pub async fn update(pool: &Pool<ConnectionManager<PgConnection>>, pm_data: PermissionMembership) -> Result<PermissionMembershipData,
-        Status> {
+    pub async fn update(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        pm_data: PermissionMembershipData,
+    ) -> Result<PermissionMembershipData, Status> {
         let conn = &mut pool.get().unwrap();
         let mut update = UpdatePermissionMembership::default();
 
@@ -133,18 +152,24 @@ impl PermissionMembership {
         let conn = &mut pool.get().unwrap();
 
         match id_permission_or_userid {
-            IdPermissionOrUserid::Id(pm_id) => match diesel::delete(permission_membership.find(pm_id)).execute(conn) {
-                Ok(results) => Ok(results),
-                Err(err) => Err(sql_err_to_grpc_error(err)),
-            },
+            IdPermissionOrUserid::Id(pm_id) => {
+                match diesel::delete(permission_membership.find(pm_id)).execute(conn) {
+                    Ok(results) => Ok(results),
+                    Err(err) => Err(sql_err_to_grpc_error(err)),
+                }
+            }
             IdPermissionOrUserid::Permission(pm_permission) => {
-                match diesel::delete(permission_membership.filter(permission.eq(pm_permission))).execute(conn) {
+                match diesel::delete(permission_membership.filter(permission.eq(pm_permission)))
+                    .execute(conn)
+                {
                     Ok(results) => Ok(results),
                     Err(err) => Err(sql_err_to_grpc_error(err)),
                 }
             }
             IdPermissionOrUserid::UserId(pm_userid) => {
-                match diesel::delete(permission_membership.filter(user_id.eq(pm_userid))).execute(conn) {
+                match diesel::delete(permission_membership.filter(user_id.eq(pm_userid)))
+                    .execute(conn)
+                {
                     Ok(results) => Ok(results),
                     Err(err) => Err(sql_err_to_grpc_error(err)),
                 }

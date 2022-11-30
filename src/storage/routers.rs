@@ -107,20 +107,20 @@ impl Router {
     #[instrument]
     pub async fn add(
         pool: &Pool<ConnectionManager<PgConnection>>,
-        new_agent: i32,
-        new_snmp_community: &str,
-        new_ssh_username: &str,
-        new_ssh_password: &str,
-        new_conn_type: &str,
-        new_router_type: &str,
+        router_data: RouterData,
     ) -> Result<RouterData, Status> {
+        let new_community = router_data.snmp_community.unwrap_or_default();
+        let new_username = router_data.ssh_username.unwrap_or_default();
+        let new_password = router_data.ssh_password.unwrap_or_default();
+        let new_conn_type = router_data.conn_type.unwrap_or_default();
+        let new_router_type = router_data.router_type.unwrap_or_default();
         let new_router = NewRouter {
-            agent: new_agent,
-            snmp_community: new_snmp_community,
-            ssh_username: new_ssh_username,
-            ssh_password: new_ssh_password,
-            conn_type: new_conn_type,
-            router_type: new_router_type,
+            agent: router_data.agent,
+            snmp_community: new_community.as_str(),
+            ssh_username: new_username.as_str(),
+            ssh_password:  new_password.as_str(),
+            conn_type: new_conn_type.as_str(),
+            router_type: new_router_type.as_str(),
         };
         let conn = &mut pool.get().unwrap();
 

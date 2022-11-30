@@ -47,7 +47,9 @@ impl From<&User> for UserData {
 
 impl User {
     #[instrument]
-    pub async fn all(pool: &Pool<ConnectionManager<PgConnection>>) -> Result<Vec<UserData>, Status> {
+    pub async fn all(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+    ) -> Result<Vec<UserData>, Status> {
         let conn = &mut pool.get().unwrap();
 
         match users.load::<User>(conn) {
@@ -57,7 +59,10 @@ impl User {
     }
 
     #[instrument]
-    pub async fn get(pool: &Pool<ConnectionManager<PgConnection>>, id_or_email: &IdOrEmail) -> Result<UserData, Status> {
+    pub async fn get(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        id_or_email: &IdOrEmail,
+    ) -> Result<UserData, Status> {
         let conn = &mut pool.get().unwrap();
 
         match id_or_email {
@@ -75,8 +80,13 @@ impl User {
     }
 
     #[instrument]
-    pub async fn add(pool: &Pool<ConnectionManager<PgConnection>>, user_email: &str) -> Result<UserData, Status> {
-        let new_user = NewUser { email: user_email };
+    pub async fn add(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        user_data: UserData,
+    ) -> Result<UserData, Status> {
+        let new_user = NewUser {
+            email: user_data.email.as_str(),
+        };
         let conn = &mut pool.get().unwrap();
 
         match diesel::insert_into(users)
@@ -89,7 +99,10 @@ impl User {
     }
 
     #[instrument]
-    pub async fn update(pool: &Pool<ConnectionManager<PgConnection>>, user_data: UserData) -> Result<UserData, Status> {
+    pub async fn update(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        user_data: UserData,
+    ) -> Result<UserData, Status> {
         let conn = &mut pool.get().unwrap();
         let mut update = UpdateUser::default();
 

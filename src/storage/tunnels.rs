@@ -121,10 +121,7 @@ impl Tunnel {
                 Err(err) => Err(sql_err_to_grpc_error(err)),
             },
             IdOrRouter::Router(router_id) => {
-                match tunnels
-                    .filter(router.eq(router_id))
-                    .first::<Tunnel>(conn)
-                {
+                match tunnels.filter(router.eq(router_id)).first::<Tunnel>(conn) {
                     Ok(results) => Ok(results.into()),
                     Err(err) => Err(sql_err_to_grpc_error(err)),
                 }

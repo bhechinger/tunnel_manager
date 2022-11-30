@@ -21,7 +21,7 @@ message PermissionMembershipData {
 
 /* List method */
 message PermissionMembershipsData {
-  repeated PermissionMembershipData permissionmemberships = 2;
+  repeated PermissionMembershipData memberships = 2;
 }
 
 /* Get method */
