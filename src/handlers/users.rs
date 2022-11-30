@@ -67,7 +67,7 @@ impl User for UserService {
             return Err(Status::invalid_argument("email is required"));
         }
 
-        match users::User::add(&self.pool, req.email.as_str()).await {
+        match users::User::add(&self.pool, req).await {
             Ok(result) => Ok(Response::new(result)),
             Err(status) => {
                 error!(message = "Error adding user", status = status.message());
@@ -84,7 +84,7 @@ impl User for UserService {
 
         match req.id_or_email {
             Some(id_or_email) => match users::User::delete(&self.pool, id_or_email).await {
-                Ok(_) => Ok(Response::new(UserData { id: Some(0), email: "".to_string() })), // I don't love this
+                Ok(_) => Ok(Response::new(UserData::default())),
                 Err(status) => {
                     error!(
                         message = "Error deleting user by id",
@@ -106,7 +106,6 @@ impl User for UserService {
             return Err(Status::invalid_argument("User id required"));
         }
 
-        // match users::User::update(&self.pool, userdata_to_data(&req)).await {
         match users::User::update(&self.pool, req).await {
             Ok(result) => Ok(Response::new(result)),
             Err(status) => {

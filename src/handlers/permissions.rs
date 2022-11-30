@@ -71,7 +71,7 @@ impl Permission for PermissionService {
             return Err(Status::invalid_argument("Permission description is required"));
         }
 
-        match permissions::Permission::add(&self.pool, req.name.as_str(), req.description.as_str()).await {
+        match permissions::Permission::add(&self.pool, req).await {
             Ok(result) => Ok(Response::new(result)),
             Err(status) => {
                 error!(message = "Error adding permission", status = status.message());
@@ -88,7 +88,7 @@ impl Permission for PermissionService {
 
         match req.id_or_name {
             Some(id_or_name) => match permissions::Permission::delete(&self.pool, id_or_name).await {
-                Ok(_) => Ok(Response::new(PermissionData { id: Some(0), name: "".to_string(), description: "".to_string() })), // I don't love this
+                Ok(_) => Ok(Response::new(PermissionData::default())),
                 Err(status) => {
                     error!(
                         message = "Error deleting permission by id",

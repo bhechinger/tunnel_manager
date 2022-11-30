@@ -52,7 +52,9 @@ impl From<&Permission> for PermissionData {
 
 impl Permission {
     #[instrument]
-    pub async fn all(pool: &Pool<ConnectionManager<PgConnection>>) -> Result<Vec<PermissionData>, Status> {
+    pub async fn all(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+    ) -> Result<Vec<PermissionData>, Status> {
         let conn = &mut pool.get().unwrap();
 
         match permissions.load::<Permission>(conn) {
@@ -62,7 +64,10 @@ impl Permission {
     }
 
     #[instrument]
-    pub async fn get(pool: &Pool<ConnectionManager<PgConnection>>, id_or_name: &IdOrName) -> Result<PermissionData, Status> {
+    pub async fn get(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        id_or_name: &IdOrName,
+    ) -> Result<PermissionData, Status> {
         let conn = &mut pool.get().unwrap();
 
         match id_or_name {
@@ -71,7 +76,10 @@ impl Permission {
                 Err(err) => Err(sql_err_to_grpc_error(err)),
             },
             IdOrName::Name(permission_name) => {
-                match permissions.filter(name.eq(permission_name)).first::<Permission>(conn) {
+                match permissions
+                    .filter(name.eq(permission_name))
+                    .first::<Permission>(conn)
+                {
                     Ok(results) => Ok(results.into()),
                     Err(err) => Err(sql_err_to_grpc_error(err)),
                 }
@@ -80,8 +88,14 @@ impl Permission {
     }
 
     #[instrument]
-    pub async fn add(pool: &Pool<ConnectionManager<PgConnection>>, permission_name: &str, permission_description: &str) -> Result<PermissionData, Status> {
-        let new_user = NewPermission { name: permission_name, description: permission_description };
+    pub async fn add(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        permission_data: PermissionData,
+    ) -> Result<PermissionData, Status> {
+        let new_user = NewPermission {
+            name: permission_data.name.as_str(),
+            description: permission_data.description.as_str(),
+        };
         let conn = &mut pool.get().unwrap();
 
         match diesel::insert_into(permissions)
@@ -94,7 +108,10 @@ impl Permission {
     }
 
     #[instrument]
-    pub async fn update(pool: &Pool<ConnectionManager<PgConnection>>, permission_data: PermissionData) -> Result<PermissionData, Status> {
+    pub async fn update(
+        pool: &Pool<ConnectionManager<PgConnection>>,
+        permission_data: PermissionData,
+    ) -> Result<PermissionData, Status> {
         let conn = &mut pool.get().unwrap();
         let mut update = UpdatePermission::default();
 
@@ -127,10 +144,12 @@ impl Permission {
         let conn = &mut pool.get().unwrap();
 
         match id_or_name {
-            IdOrName::Id(permission_id) => match diesel::delete(permissions.find(permission_id)).execute(conn) {
-                Ok(results) => Ok(results),
-                Err(err) => Err(sql_err_to_grpc_error(err)),
-            },
+            IdOrName::Id(permission_id) => {
+                match diesel::delete(permissions.find(permission_id)).execute(conn) {
+                    Ok(results) => Ok(results),
+                    Err(err) => Err(sql_err_to_grpc_error(err)),
+                }
+            }
             IdOrName::Name(permission_name) => {
                 match diesel::delete(permissions.filter(name.eq(permission_name))).execute(conn) {
                     Ok(results) => Ok(results),
