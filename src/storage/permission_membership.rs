@@ -75,7 +75,7 @@ impl PermissionMembership {
                 .find(pm_id)
                 .load::<PermissionMembership>(conn)
             {
-                Ok(results) => Ok(results.into()),
+                Ok(results) => Ok(results.iter().map(|t| t.into()).collect()),
                 Err(err) => Err(sql_err_to_grpc_error(err)),
             },
             IdPermissionOrUserid::Permission(pm_permission) => {
@@ -83,7 +83,7 @@ impl PermissionMembership {
                     .filter(permission.eq(pm_permission))
                     .load::<PermissionMembership>(conn)
                 {
-                    Ok(results) => Ok(results.into()),
+                    Ok(results) => Ok(results.iter().map(|t| t.into()).collect()),
                     Err(err) => Err(sql_err_to_grpc_error(err)),
                 }
             }
@@ -92,7 +92,7 @@ impl PermissionMembership {
                     .filter(user_id.eq(pm_userid))
                     .load::<PermissionMembership>(conn)
                 {
-                    Ok(results) => Ok(results.into()),
+                    Ok(results) => Ok(results.iter().map(|t| t.into()).collect()),
                     Err(err) => Err(sql_err_to_grpc_error(err)),
                 }
             }
@@ -135,7 +135,7 @@ impl PermissionMembership {
             update.user_id = Some(pm_data.user_id)
         }
 
-        match diesel::update(permission_membership.find(pm_data.id))
+        match diesel::update(permission_membership.find(pm_data.id.unwrap()))
             .set(update)
             .get_result::<PermissionMembership>(conn)
         {
