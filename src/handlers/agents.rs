@@ -47,7 +47,7 @@ impl Agent for AgentService {
                 Ok(result) => Ok(Response::new(AgentsData { agents: result })),
                 Err(status) => {
                     error!(
-                        message = "Error getting agent by id",
+                        message = "Error getting agent",
                         status = status.message()
                     );
                     return Err(status);

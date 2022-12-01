@@ -47,7 +47,7 @@ impl PermissionMembership for PermissionMembershipService {
                 Ok(result) => Ok(Response::new(PermissionMembershipsData { memberships: result })),
                 Err(status) => {
                     error!(
-                        message = "Error getting permission membership by id",
+                        message = "Error getting permission members",
                         status = status.message()
                     );
                     return Err(status);
@@ -68,7 +68,7 @@ impl PermissionMembership for PermissionMembershipService {
                 Ok(result) => Ok(Response::new(PermissionMembershipsData { memberships: result })),
                 Err(status) => {
                     error!(
-                        message = "Error getting permission membership by id",
+                        message = "Error getting user permissions",
                         status = status.message()
                     );
                     return Err(status);

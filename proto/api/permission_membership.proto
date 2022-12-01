@@ -6,8 +6,8 @@ import "google/protobuf/empty.proto";
 
 service PermissionMembership {
   rpc List(google.protobuf.Empty) returns (PermissionMembershipsData) {}
-  rpc GetPermissionMembers(PermissionMembershipRequest) returns (PermissionMembershipData) {}
-  rpc GetUserPermissions(PermissionMembershipRequest) returns (PermissionMembershipData) {}
+  rpc GetPermissionMembers(PermissionMembershipRequest) returns (PermissionMembershipsData) {}
+  rpc GetUserPermissions(PermissionMembershipRequest) returns (PermissionMembershipsData) {}
   rpc Add(PermissionMembershipData) returns (PermissionMembershipData) {}
   rpc Delete(PermissionMembershipRequest) returns (PermissionMembershipData) {}
   rpc Update(PermissionMembershipData) returns (PermissionMembershipData) {}
