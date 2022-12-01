@@ -47,7 +47,7 @@ impl Permission for PermissionService {
                 Ok(result) => Ok(Response::new(result)),
                 Err(status) => {
                     error!(
-                        message = "Error getting permission by id",
+                        message = "Error getting permission",
                         status = status.message()
                     );
                     return Err(status);
@@ -91,7 +91,7 @@ impl Permission for PermissionService {
                 Ok(_) => Ok(Response::new(PermissionData::default())),
                 Err(status) => {
                     error!(
-                        message = "Error deleting permission by id",
+                        message = "Error deleting permission",
                         status = status.message()
                     );
                     return Err(status);

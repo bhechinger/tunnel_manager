@@ -47,7 +47,7 @@ impl User for UserService {
                 Ok(result) => Ok(Response::new(result)),
                 Err(status) => {
                     error!(
-                        message = "Error getting user by id",
+                        message = "Error getting user",
                         status = status.message()
                     );
                     return Err(status);
@@ -87,7 +87,7 @@ impl User for UserService {
                 Ok(_) => Ok(Response::new(UserData::default())),
                 Err(status) => {
                     error!(
-                        message = "Error deleting user by id",
+                        message = "Error deleting user",
                         status = status.message()
                     );
                     return Err(status);
