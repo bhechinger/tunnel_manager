@@ -3,11 +3,14 @@ use std::env;
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
 use tonic::transport::Server;
 
 use tunnel_manager::api::*;
 use tunnel_manager::handlers::*;
+
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -28,6 +31,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .max_size(db_max_conn)
         .build(manager)
         .expect("Could not build connection pool");
+
+    {
+        // Run database migrations
+        let conn = &mut pool.get().unwrap();
+        conn.run_pending_migrations(MIGRATIONS).unwrap();
+    }
 
     let addr = format!("{}:{}", grpc_host, grpc_port).parse()?;
 
