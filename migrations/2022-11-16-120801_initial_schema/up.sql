@@ -1,7 +1,8 @@
 CREATE TABLE users
 (
-    id    SERIAL PRIMARY KEY NOT NULL,
-    email VARCHAR UNIQUE     NOT NULL
+    id       SERIAL PRIMARY KEY NOT NULL,
+    email    VARCHAR UNIQUE     NOT NULL,
+    password VARCHAR            NOT NULL
 );
 
 CREATE TABLE permissions

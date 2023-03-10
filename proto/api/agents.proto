@@ -7,8 +7,8 @@ import "google/protobuf/empty.proto";
 service Agent {
   rpc List(google.protobuf.Empty) returns (AgentsData) {}
   rpc Get(AgentRequest) returns (AgentsData) {}
-  rpc Add(AgentData) returns (AgentData) {}
-  rpc Delete(AgentRequest) returns (AgentData) {}
+  rpc Register(AgentData) returns (AgentData) {}
+  rpc Unregister(AgentRequest) returns (google.protobuf.Empty) {}
   rpc Update(AgentData) returns (AgentData) {}
 }
 

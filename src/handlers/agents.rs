@@ -58,7 +58,7 @@ impl Agent for AgentService {
     }
 
     #[instrument]
-    async fn add(&self, request: Request<AgentData>) -> Result<Response<AgentData>, Status> {
+    async fn register(&self, request: Request<AgentData>) -> Result<Response<AgentData>, Status> {
         info!(message = "Got an add request", ?request);
 
         let req = request.into_inner();
@@ -81,14 +81,14 @@ impl Agent for AgentService {
     }
 
     #[instrument]
-    async fn delete(&self, request: Request<AgentRequest>) -> Result<Response<AgentData>, Status> {
+    async fn unregister(&self, request: Request<AgentRequest>) -> Result<Response<()>, Status> {
         info!(message = "Got a delete request", ?request);
 
         let req = request.into_inner();
 
         match req.id_uuid_or_owner {
             Some(id_uuid_or_owner) => match agents::Agent::delete(&self.pool, id_uuid_or_owner).await {
-                Ok(_) => Ok(Response::new(AgentData::default())),
+                Ok(_) => Ok(Response::new(())),
                 Err(status) => {
                     error!(
                         message = "Error deleting agent",
@@ -97,7 +97,7 @@ impl Agent for AgentService {
                     return Err(status);
                 }
             },
-            None => Err(Status::invalid_argument("Agent id or email required")),
+            None => Err(Status::invalid_argument("Agent id/uuid or owner email required")),
         }
     }
 

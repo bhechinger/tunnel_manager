@@ -1,11 +1,16 @@
-use std::env;
-
+use std::{
+    task::{Context, Poll},
+    time::Duration,
+    env,
+};
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
+use tonic::{Request, Status};
 use tonic::transport::Server;
+use tower::{Layer, Service};
 
 use tunnel_manager::api::*;
 use tunnel_manager::handlers::*;
@@ -40,24 +45,45 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let addr = format!("{}:{}", grpc_host, grpc_port).parse()?;
 
-    // let agent = agents::AgentService::new(pool.clone());
-    // let auth = login::AuthService::new(pool.clone());
-    // let router = routers::RouterService::new(pool.clone());
-    // let tunnel = tunnels::TunnelService::new(pool.clone());
+    let auth = login::AuthService::new(pool.clone());
+    let agent = agents::AgentService::new(pool.clone());
+    let router = routers::RouterService::new(pool.clone());
+    let tunnel = tunnels::TunnelService::new(pool.clone());
     let user = users::UserService::new(pool.clone());
     let permission = permissions::PermissionService::new(pool.clone());
+
+    let layer = tower::ServiceBuilder::new()
+        .timeout(Duration::from_secs(30)).into_inner()
+        .layer(tonic::service::interceptor(auth_intercept))
+        .into_inner();
 
     println!("Running on port {}", grpc_port);
 
     Server::builder()
-        // .add_service(agent_server::AgentServer::new(agent))
-        // .add_service(auth_server::AuthServer::new(auth))
-        // .add_service(router_server::RouterServer::new(router))
-        // .add_service(tunnel_server::TunnelServer::new(tunnel))
+        .layer(layer)
+        .add_service(login_server::LoginServer::new(auth))
+        .add_service(agent_server::AgentServer::new(agent))
+        .add_service(auth_server::AuthServer::new(auth))
+        .add_service(router_server::RouterServer::new(router))
+        .add_service(tunnel_server::TunnelServer::new(tunnel))
         .add_service(user_server::UserServer::new(user))
         .add_service(permission_server::PermissionServer::new(permission))
+        .with_interceptor(Server::default(), auth_interceptor)
         .serve(addr)
         .await?;
 
     Ok(())
+}
+
+fn auth_interceptor(req: Request<()>) -> Result<Request<()>, Status> {
+    let token = match req.metadata().get("authorization") {
+        Some(token) => token.to_str(),
+        None => "no_token".to_str()
+        // None => return Err(Status::unauthenticated("Token not found"))
+    };
+
+    println!("token: {}", token.unwrap());
+
+    // do some validation with token here ...
+    Ok(req)
 }
