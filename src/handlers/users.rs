@@ -3,7 +3,7 @@ use diesel::r2d2::{ConnectionManager, Pool};
 use tonic::{Request, Response, Status};
 use tracing::{error, info, instrument};
 
-use crate::api::{UserData, UserRequest, UsersData};
+use crate::api::{UserRequest, UsersResponse, UserResponse, UserAddRequest, UserUpdateRequest};
 use crate::api::user_server::User;
 use crate::storage::users;
 
@@ -21,11 +21,11 @@ impl UserService {
 #[tonic::async_trait]
 impl User for UserService {
     #[instrument]
-    async fn list(&self, request: Request<()>) -> Result<Response<UsersData>, Status> {
+    async fn list(&self, request: Request<()>) -> Result<Response<UsersResponse>, Status> {
         info!(message = "Got a list request", ?request);
 
         match users::User::all(&self.pool).await {
-            Ok(result) => Ok(Response::new(UsersData { users: result })),
+            Ok(result) => Ok(Response::new(UsersResponse { users: result })),
             Err(status) => {
                 error!(
                     message = "Error getting list of users",
@@ -37,7 +37,7 @@ impl User for UserService {
     }
 
     #[instrument]
-    async fn get(&self, request: Request<UserRequest>) -> Result<Response<UserData>, Status> {
+    async fn get(&self, request: Request<UserRequest>) -> Result<Response<UserResponse>, Status> {
         info!(message = "Got a get request", ?request);
 
         let req = request.into_inner();
@@ -58,7 +58,7 @@ impl User for UserService {
     }
 
     #[instrument]
-    async fn add(&self, request: Request<UserData>) -> Result<Response<UserData>, Status> {
+    async fn add(&self, request: Request<UserAddRequest>) -> Result<Response<UserResponse>, Status> {
         info!(message = "Got an add request", ?request);
 
         let req = request.into_inner();
@@ -77,14 +77,14 @@ impl User for UserService {
     }
 
     #[instrument]
-    async fn delete(&self, request: Request<UserRequest>) -> Result<Response<UserData>, Status> {
+    async fn delete(&self, request: Request<UserRequest>) -> Result<Response<UserResponse>, Status> {
         info!(message = "Got a delete request", ?request);
 
         let req = request.into_inner();
 
         match req.id_or_email {
             Some(id_or_email) => match users::User::delete(&self.pool, id_or_email).await {
-                Ok(_) => Ok(Response::new(UserData::default())),
+                Ok(_) => Ok(Response::new(UserResponse::default())),
                 Err(status) => {
                     error!(
                         message = "Error deleting user",
@@ -98,11 +98,11 @@ impl User for UserService {
     }
 
     #[instrument]
-    async fn update(&self, request: Request<UserData>) -> Result<Response<UserData>, Status> {
+    async fn update(&self, request: Request<UserUpdateRequest>) -> Result<Response<UserResponse>, Status> {
         info!(message = "Got an update request", ?request);
 
         let req = request.into_inner();
-        if req.id.is_none() {
+        if req.id == 0 {
             return Err(Status::invalid_argument("User id required"));
         }
 

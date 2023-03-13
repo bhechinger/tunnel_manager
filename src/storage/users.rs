@@ -4,7 +4,7 @@ use tonic::Status;
 use tracing::instrument;
 
 use crate::api::user_request::IdOrEmail;
-use crate::api::UserData;
+use crate::api::{UserResponse, UserAddRequest, UserUpdateRequest};
 use crate::schema::users;
 use crate::schema::users::dsl::*;
 use crate::storage::helpers::sql_err_to_grpc_error;
@@ -13,6 +13,7 @@ use crate::storage::helpers::sql_err_to_grpc_error;
 pub struct User {
     pub id: i32,
     pub email: String,
+    pub password: String,
 }
 
 #[derive(Insertable)]
@@ -27,19 +28,19 @@ pub struct UpdateUser {
     pub email: Option<String>,
 }
 
-impl From<User> for UserData {
-    fn from(u: User) -> UserData {
-        UserData {
-            id: Some(u.id),
+impl From<User> for UserResponse {
+    fn from(u: User) -> UserResponse {
+        UserResponse {
+            id: u.id,
             email: u.email,
         }
     }
 }
 
-impl From<&User> for UserData {
-    fn from(u: &User) -> UserData {
-        UserData {
-            id: Some(u.id),
+impl From<&User> for UserResponse {
+    fn from(u: &User) -> UserResponse {
+        UserResponse {
+            id: u.id,
             email: u.email.clone(),
         }
     }
@@ -49,7 +50,7 @@ impl User {
     #[instrument]
     pub async fn all(
         pool: &Pool<ConnectionManager<PgConnection>>,
-    ) -> Result<Vec<UserData>, Status> {
+    ) -> Result<Vec<UserResponse>, Status> {
         let conn = &mut pool.get().unwrap();
 
         match users.load::<User>(conn) {
@@ -62,7 +63,7 @@ impl User {
     pub async fn get(
         pool: &Pool<ConnectionManager<PgConnection>>,
         id_or_email: &IdOrEmail,
-    ) -> Result<UserData, Status> {
+    ) -> Result<UserResponse, Status> {
         let conn = &mut pool.get().unwrap();
 
         match id_or_email {
@@ -82,8 +83,8 @@ impl User {
     #[instrument]
     pub async fn add(
         pool: &Pool<ConnectionManager<PgConnection>>,
-        user_data: UserData,
-    ) -> Result<UserData, Status> {
+        user_data: UserAddRequest,
+    ) -> Result<UserResponse, Status> {
         let new_user = NewUser {
             email: user_data.email.as_str(),
         };
@@ -101,20 +102,20 @@ impl User {
     #[instrument]
     pub async fn update(
         pool: &Pool<ConnectionManager<PgConnection>>,
-        user_data: UserData,
-    ) -> Result<UserData, Status> {
+        user_data: UserUpdateRequest,
+    ) -> Result<UserResponse, Status> {
         let conn = &mut pool.get().unwrap();
         let mut update = UpdateUser::default();
 
-        if user_data.id.is_none() {
+        if user_data.id == 0 {
             return Err(Status::invalid_argument("User id is required"));
         }
 
-        if !user_data.email.is_empty() {
-            update.email = Some(user_data.email);
+        if !user_data.email.is_none() {
+            update.email = user_data.email;
         }
 
-        match diesel::update(users.find(user_data.id.unwrap()))
+        match diesel::update(users.find(user_data.id))
             .set(update)
             .get_result::<User>(conn)
         {

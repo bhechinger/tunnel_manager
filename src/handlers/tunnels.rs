@@ -3,7 +3,7 @@ use diesel::r2d2::{ConnectionManager, Pool};
 use tonic::{Request, Response, Status};
 use tracing::{error, info, instrument};
 
-use crate::api::{TunnelData, TunnelRequest, TunnelsData};
+use crate::api::{TunnelAddRequest, TunnelRequest, TunnelResponse, TunnelsResponse, TunnelUpdateRequest};
 use crate::api::tunnel_server::Tunnel;
 use crate::storage::tunnels;
 
@@ -21,11 +21,11 @@ impl TunnelService {
 #[tonic::async_trait]
 impl Tunnel for TunnelService {
     #[instrument]
-    async fn list(&self, request: Request<()>) -> Result<Response<TunnelsData>, Status> {
+    async fn list(&self, request: Request<()>) -> Result<Response<TunnelsResponse>, Status> {
         info!(message = "Got a list request", ?request);
 
         match tunnels::Tunnel::all(&self.pool).await {
-            Ok(result) => Ok(Response::new(TunnelsData { tunnels: result })),
+            Ok(result) => Ok(Response::new(TunnelsResponse { tunnels: result })),
             Err(status) => {
                 error!(
                     message = "Error getting list of tunnels",
@@ -37,14 +37,14 @@ impl Tunnel for TunnelService {
     }
 
     #[instrument]
-    async fn get(&self, request: Request<TunnelRequest>) -> Result<Response<TunnelsData>, Status> {
+    async fn get(&self, request: Request<TunnelRequest>) -> Result<Response<TunnelResponse>, Status> {
         info!(message = "Got a get request", ?request);
 
         let req = request.into_inner();
 
-        match req.it_or_router {
-            Some(it_or_router) => match tunnels::Tunnel::get(&self.pool, &it_or_router).await {
-                Ok(result) => Ok(Response::new(TunnelsData { tunnels: result })),
+        match req.id_or_router {
+            Some(id_or_router) => match tunnels::Tunnel::get(&self.pool, &id_or_router).await {
+                Ok(result) => Ok(Response::new(result)),
                 Err(status) => {
                     error!(
                         message = "Error getting tunnel",
@@ -58,7 +58,7 @@ impl Tunnel for TunnelService {
     }
 
     #[instrument]
-    async fn add(&self, request: Request<TunnelData>) -> Result<Response<TunnelData>, Status> {
+    async fn add(&self, request: Request<TunnelAddRequest>) -> Result<Response<TunnelResponse>, Status> {
         info!(message = "Got an add request", ?request);
 
         let req = request.into_inner();
@@ -93,14 +93,14 @@ impl Tunnel for TunnelService {
     }
 
     #[instrument]
-    async fn delete(&self, request: Request<TunnelRequest>) -> Result<Response<TunnelData>, Status> {
+    async fn delete(&self, request: Request<TunnelRequest>) -> Result<Response<TunnelResponse>, Status> {
         info!(message = "Got a delete request", ?request);
 
-        let req = request.into_inner();
+        // let req = request.into_inner();
 
-        match req.it_or_router {
-            Some(it_or_router) => match tunnels::Tunnel::delete(&self.pool, it_or_router).await {
-                Ok(_) => Ok(Response::new(TunnelData::default())),
+        match request.into_inner().id_or_router {
+            Some(id_or_router) => match tunnels::Tunnel::delete(&self.pool, id_or_router).await {
+                Ok(_) => Ok(Response::new(TunnelResponse::default())),
                 Err(status) => {
                     error!(
                         message = "Error deleting tunnel",
@@ -114,15 +114,10 @@ impl Tunnel for TunnelService {
     }
 
     #[instrument]
-    async fn update(&self, request: Request<TunnelData>) -> Result<Response<TunnelData>, Status> {
+    async fn update(&self, request: Request<TunnelUpdateRequest>) -> Result<Response<TunnelResponse>, Status> {
         info!(message = "Got an update request", ?request);
 
-        let req = request.into_inner();
-        if req.id.is_none() {
-            return Err(Status::invalid_argument("Tunnel id required"));
-        }
-
-        match tunnels::Tunnel::update(&self.pool, req).await {
+        match tunnels::Tunnel::update(&self.pool, request.into_inner()).await {
             Ok(result) => Ok(Response::new(result)),
             Err(status) => {
                 error!(

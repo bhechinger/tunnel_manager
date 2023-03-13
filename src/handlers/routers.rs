@@ -3,7 +3,7 @@ use diesel::r2d2::{ConnectionManager, Pool};
 use tonic::{Request, Response, Status};
 use tracing::{error, info, instrument};
 
-use crate::api::{RouterData, RouterRequest, RoutersData};
+use crate::api::{RouterAddRequest, RouterRequest, RouterResponse, RoutersResponse, RouterUpdateRequest};
 use crate::api::router_server::Router;
 use crate::storage::routers;
 
@@ -21,11 +21,11 @@ impl RouterService {
 #[tonic::async_trait]
 impl Router for RouterService {
     #[instrument]
-    async fn list(&self, request: Request<()>) -> Result<Response<RoutersData>, Status> {
+    async fn list(&self, request: Request<()>) -> Result<Response<RoutersResponse>, Status> {
         info!(message = "Got a list request", ?request);
 
         match routers::Router::all(&self.pool).await {
-            Ok(result) => Ok(Response::new(RoutersData { routers: result })),
+            Ok(result) => Ok(Response::new(RoutersResponse { routers: result })),
             Err(status) => {
                 error!(
                     message = "Error getting list of routers",
@@ -37,14 +37,14 @@ impl Router for RouterService {
     }
 
     #[instrument]
-    async fn get(&self, request: Request<RouterRequest>) -> Result<Response<RoutersData>, Status> {
+    async fn get(&self, request: Request<RouterRequest>) -> Result<Response<RouterResponse>, Status> {
         info!(message = "Got a get request", ?request);
 
         let req = request.into_inner();
 
         match req.id_or_agent {
             Some(id_or_agent) => match routers::Router::get(&self.pool, &id_or_agent).await {
-                Ok(result) => Ok(Response::new(RoutersData { routers: result })),
+                Ok(result) => Ok(Response::new(result)),
                 Err(status) => {
                     error!(
                         message = "Error getting router",
@@ -58,7 +58,7 @@ impl Router for RouterService {
     }
 
     #[instrument]
-    async fn add(&self, request: Request<RouterData>) -> Result<Response<RouterData>, Status> {
+    async fn add(&self, request: Request<RouterAddRequest>) -> Result<Response<RouterResponse>, Status> {
         info!(message = "Got an add request", ?request);
 
         let req = request.into_inner();
@@ -77,14 +77,14 @@ impl Router for RouterService {
     }
 
     #[instrument]
-    async fn delete(&self, request: Request<RouterRequest>) -> Result<Response<RouterData>, Status> {
+    async fn delete(&self, request: Request<RouterRequest>) -> Result<Response<RouterResponse>, Status> {
         info!(message = "Got a delete request", ?request);
 
         let req = request.into_inner();
 
         match req.id_or_agent {
             Some(id_or_agent) => match routers::Router::delete(&self.pool, id_or_agent).await {
-                Ok(_) => Ok(Response::new(RouterData::default())),
+                Ok(_) => Ok(Response::new(RouterResponse::default())),
                 Err(status) => {
                     error!(
                         message = "Error deleting router",
@@ -98,11 +98,11 @@ impl Router for RouterService {
     }
 
     #[instrument]
-    async fn update(&self, request: Request<RouterData>) -> Result<Response<RouterData>, Status> {
+    async fn update(&self, request: Request<RouterUpdateRequest>) -> Result<Response<RouterResponse>, Status> {
         info!(message = "Got an update request", ?request);
 
         let req = request.into_inner();
-        if req.id.is_none() {
+        if req.id == 0 {
             return Err(Status::invalid_argument("Router id required"));
         }
 
