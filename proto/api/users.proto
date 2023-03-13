@@ -5,21 +5,32 @@ package api;
 import "google/protobuf/empty.proto";
 
 service User {
-  rpc List(google.protobuf.Empty) returns (UsersData) {}
-  rpc Get(UserRequest) returns (UserData) {}
-  rpc Add(UserData) returns (UserData) {}
-  rpc Delete(UserRequest) returns (UserData) {}
-  rpc Update(UserData) returns (UserData) {}
+  rpc List(google.protobuf.Empty) returns (UsersResponse) {}
+  rpc Get(UserRequest) returns (UserResponse) {}
+  rpc Add(UserAddRequest) returns (UserResponse) {}
+  rpc Delete(UserRequest) returns (UserResponse) {}
+  rpc Update(UserUpdateRequest) returns (UserResponse) {}
 }
 
-message UserData {
-  optional int32 ID = 1;
+message UserResponse {
+  int32 ID = 1;
   string email = 2;
 }
 
+message UserAddRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message UserUpdateRequest {
+  int32 ID = 1;
+  optional string email = 2;
+  optional string password = 3;
+}
+
 /* List method */
-message UsersData {
-  repeated UserData users = 2;
+message UsersResponse {
+  repeated UserResponse users = 2;
 }
 
 /* Get method */

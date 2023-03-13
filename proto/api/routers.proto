@@ -5,16 +5,16 @@ package api;
 import "google/protobuf/empty.proto";
 
 service Router {
-  rpc List(google.protobuf.Empty) returns (RoutersData) {}
-  rpc Get(RouterRequest) returns (RoutersData) {}
-  rpc Add(RouterData) returns (RouterData) {}
-  rpc Delete(RouterRequest) returns (RouterData) {}
-  rpc Update(RouterData) returns (RouterData) {}
+  rpc List(google.protobuf.Empty) returns (RoutersResponse) {}
+  rpc Get(RouterRequest) returns (RouterResponse) {}
+  rpc Add(RouterAddRequest) returns (RouterResponse) {}
+  rpc Delete(RouterRequest) returns (RouterResponse) {}
+  rpc Update(RouterUpdateRequest) returns (RouterResponse) {}
 }
 
-message RouterData {
+message RouterResponse {
   optional int32 ID = 1;
-  int32 agent = 2;
+  optional int32 agent = 2;
   optional string snmp_community = 3;
   optional string ssh_username = 4;
   optional string ssh_password = 5;
@@ -22,8 +22,27 @@ message RouterData {
   optional string router_type = 7;
 }
 
-message RoutersData {
-  repeated RouterData routers = 1;
+message RouterAddRequest {
+  int32 agent = 1;
+  optional string snmp_community = 2;
+  optional string ssh_username = 3;
+  optional string ssh_password = 4;
+  optional string conn_type = 5;
+  optional string router_type = 6;
+}
+
+message RouterUpdateRequest {
+  int32 ID = 1;
+  optional int32 agent = 2;
+  optional string snmp_community = 3;
+  optional string ssh_username = 4;
+  optional string ssh_password = 5;
+  optional string conn_type = 6;
+  optional string router_type = 7;
+}
+
+message RoutersResponse {
+  repeated RouterResponse routers = 1;
 }
 
 message RouterRequest {

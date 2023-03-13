@@ -3,8 +3,8 @@ use diesel::r2d2::{ConnectionManager, Pool};
 use tonic::Status;
 use tracing::instrument;
 
+use crate::api::{TunnelAddRequest, TunnelResponse, TunnelUpdateRequest};
 use crate::api::tunnel_request::IdOrRouter;
-use crate::api::TunnelData;
 use crate::schema::tunnels;
 use crate::schema::tunnels::dsl::*;
 use crate::storage::helpers::sql_err_to_grpc_error;
@@ -57,40 +57,40 @@ pub struct UpdateTunnel {
     pub topology_type: Option<String>,
 }
 
-impl From<Tunnel> for TunnelData {
-    fn from(t: Tunnel) -> TunnelData {
-        TunnelData {
-            id: Some(t.id),
-            version: Some(t.version),
+impl From<Tunnel> for TunnelResponse {
+    fn from(t: Tunnel) -> TunnelResponse {
+        TunnelResponse {
+            id: t.id,
+            version: t.version,
             router: t.router,
             ip: t.ip,
-            dynamic_ip: Some(t.dynamic_ip),
-            ip_class: Some(t.ip_class),
+            dynamic_ip: t.dynamic_ip,
+            ip_class: t.ip_class,
             hostname: t.hostname,
             description: t.description,
             source: t.source,
-            cost: Some(t.cost),
-            tunnel_type: Some(t.tunnel_type),
-            topology_type: Some(t.topology_type),
+            cost: t.cost,
+            tunnel_type: t.tunnel_type,
+            topology_type: t.topology_type,
         }
     }
 }
 
-impl From<&Tunnel> for TunnelData {
-    fn from(t: &Tunnel) -> TunnelData {
-        TunnelData {
-            id: Some(t.id),
-            version: Some(t.version),
+impl From<&Tunnel> for TunnelResponse {
+    fn from(t: &Tunnel) -> TunnelResponse {
+        TunnelResponse {
+            id: t.id,
+            version: t.version,
             router: t.router,
             ip: t.ip.clone(),
-            dynamic_ip: Some(t.dynamic_ip),
-            ip_class: Some(t.ip_class),
+            dynamic_ip: t.dynamic_ip,
+            ip_class: t.ip_class,
             hostname: t.hostname.clone(),
             description: t.description.clone(),
             source: t.source.clone(),
-            cost: Some(t.cost),
-            tunnel_type: Some(t.tunnel_type.clone()),
-            topology_type: Some(t.topology_type.clone()),
+            cost: t.cost,
+            tunnel_type: t.tunnel_type.clone(),
+            topology_type: t.topology_type.clone(),
         }
     }
 }
@@ -99,7 +99,7 @@ impl Tunnel {
     #[instrument]
     pub async fn all(
         pool: &Pool<ConnectionManager<PgConnection>>,
-    ) -> Result<Vec<TunnelData>, Status> {
+    ) -> Result<Vec<TunnelResponse>, Status> {
         let conn = &mut pool.get().unwrap();
 
         match tunnels.load::<Tunnel>(conn) {
@@ -112,7 +112,7 @@ impl Tunnel {
     pub async fn get(
         pool: &Pool<ConnectionManager<PgConnection>>,
         id_or_router: &IdOrRouter,
-    ) -> Result<TunnelData, Status> {
+    ) -> Result<TunnelResponse, Status> {
         let conn = &mut pool.get().unwrap();
 
         match id_or_router {
@@ -132,8 +132,8 @@ impl Tunnel {
     #[instrument]
     pub async fn add(
         pool: &Pool<ConnectionManager<PgConnection>>,
-        tunnel_data: TunnelData,
-    ) -> Result<TunnelData, Status> {
+        tunnel_data: TunnelAddRequest,
+    ) -> Result<TunnelResponse, Status> {
         let tun_type = tunnel_data.tunnel_type.unwrap_or_default();
         let top_type = tunnel_data.topology_type.unwrap_or_default();
         let new_user = NewTunnel {
@@ -163,49 +163,49 @@ impl Tunnel {
     #[instrument]
     pub async fn update(
         pool: &Pool<ConnectionManager<PgConnection>>,
-        tunnel_data: Tunnel,
-    ) -> Result<TunnelData, Status> {
+        tunnel_data: TunnelUpdateRequest,
+    ) -> Result<TunnelResponse, Status> {
         let conn = &mut pool.get().unwrap();
         let mut update = UpdateTunnel::default();
 
-        if tunnel_data.version != 0 {
-            update.version = Some(tunnel_data.version);
+        if !tunnel_data.version.is_none() {
+            update.version = tunnel_data.version;
         }
 
-        if tunnel_data.router != 0 {
-            update.router = Some(tunnel_data.router);
+        if !tunnel_data.router.is_none() {
+            update.router = tunnel_data.router;
         }
 
-        if !tunnel_data.ip.is_empty() {
-            update.ip = Some(tunnel_data.ip)
+        if !tunnel_data.ip.is_none() {
+            update.ip = tunnel_data.ip;
         }
 
-        if tunnel_data.ip_class != 0 {
-            update.ip_class = Some(tunnel_data.ip_class);
+        if !tunnel_data.ip_class.is_none()  {
+            update.ip_class = tunnel_data.ip_class;
         }
 
-        if !tunnel_data.description.is_empty() {
-            update.description = Some(tunnel_data.description)
+        if !tunnel_data.description.is_none() {
+            update.description = tunnel_data.description;
         }
 
-        if !tunnel_data.source.is_empty() {
-            update.source = Some(tunnel_data.source)
+        if !tunnel_data.source.is_none() {
+            update.source = tunnel_data.source;
         }
 
-        if tunnel_data.cost != 0 {
-            update.cost = Some(tunnel_data.cost);
+        if !tunnel_data.cost.is_none()  {
+            update.cost = tunnel_data.cost;
         }
 
-        if !tunnel_data.tunnel_type.is_empty() {
-            update.tunnel_type = Some(tunnel_data.tunnel_type)
+        if !tunnel_data.tunnel_type.is_none() {
+            update.tunnel_type = tunnel_data.tunnel_type;
         }
 
-        if !tunnel_data.hostname.is_empty() {
-            update.hostname = Some(tunnel_data.hostname)
+        if !tunnel_data.hostname.is_none() {
+            update.hostname = tunnel_data.hostname;
         }
 
-        if !tunnel_data.topology_type.is_empty() {
-            update.topology_type = Some(tunnel_data.topology_type)
+        if !tunnel_data.topology_type.is_none() {
+            update.topology_type = tunnel_data.topology_type;
         }
 
         match diesel::update(tunnels.find(tunnel_data.id))
