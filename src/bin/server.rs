@@ -11,7 +11,6 @@ use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
 use tonic::{Request, Status};
 use tonic::transport::Server;
-use tower::Layer;
 
 use tunnel_manager::api::*;
 use tunnel_manager::handlers::*;
@@ -54,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let permission = permissions::PermissionService::new(pool.clone());
 
     let layer = tower::ServiceBuilder::new()
-        .timeout(Duration::from_secs(30)).into_inner()
+        .timeout(Duration::from_secs(30))
         .layer(tonic::service::interceptor(auth_interceptor))
         .into_inner();
 
@@ -69,7 +68,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .add_service(tunnel_server::TunnelServer::new(tunnel))
         .add_service(user_server::UserServer::new(user))
         .add_service(permission_server::PermissionServer::new(permission))
-        .with_interceptor(Server::default(), auth_interceptor)
         .serve(addr)
         .await?;
 
