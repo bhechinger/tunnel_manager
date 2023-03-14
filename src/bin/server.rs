@@ -1,8 +1,9 @@
 use std::{
-    task::{Context, Poll},
-    time::Duration,
+    // task::{Context, Poll},
     env,
+    time::Duration,
 };
+
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
@@ -10,7 +11,7 @@ use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
 use tonic::{Request, Status};
 use tonic::transport::Server;
-use tower::{Layer, Service};
+use tower::Layer;
 
 use tunnel_manager::api::*;
 use tunnel_manager::handlers::*;
@@ -45,7 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let addr = format!("{}:{}", grpc_host, grpc_port).parse()?;
 
-    let auth = login::AuthService::new(pool.clone());
+    // let auth = login::AuthService::new(pool.clone());
     let agent = agents::AgentService::new(pool.clone());
     let router = routers::RouterService::new(pool.clone());
     let tunnel = tunnels::TunnelService::new(pool.clone());
@@ -54,16 +55,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let layer = tower::ServiceBuilder::new()
         .timeout(Duration::from_secs(30)).into_inner()
-        .layer(tonic::service::interceptor(auth_intercept))
+        .layer(tonic::service::interceptor(auth_interceptor))
         .into_inner();
 
     println!("Running on port {}", grpc_port);
 
     Server::builder()
         .layer(layer)
-        .add_service(login_server::LoginServer::new(auth))
+        // .add_service(login_server::LoginServer::new(auth))
         .add_service(agent_server::AgentServer::new(agent))
-        .add_service(auth_server::AuthServer::new(auth))
+        // .add_service(auth_server::AuthServer::new(auth))
         .add_service(router_server::RouterServer::new(router))
         .add_service(tunnel_server::TunnelServer::new(tunnel))
         .add_service(user_server::UserServer::new(user))
@@ -78,7 +79,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn auth_interceptor(req: Request<()>) -> Result<Request<()>, Status> {
     let token = match req.metadata().get("authorization") {
         Some(token) => token.to_str(),
-        None => "no_token".to_str()
+        None => Ok("no_token")
         // None => return Err(Status::unauthenticated("Token not found"))
     };
 
