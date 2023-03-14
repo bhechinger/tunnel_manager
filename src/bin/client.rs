@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // adding token to request.
         req.metadata_mut().insert(
             "authorization",
-            tonic::metadata::MetadataValue::from_str(&token).unwrap(),
+            tonic::metadata::MetadataValue::from_bytes(&token).unwrap(),
         );
         Ok(req)
     });
