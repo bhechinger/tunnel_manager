@@ -1,5 +1,4 @@
 use std::{
-    // task::{Context, Poll},
     env,
     time::Duration,
 };
@@ -77,8 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn auth_interceptor(req: Request<()>) -> Result<Request<()>, Status> {
     let token = match req.metadata().get("authorization") {
         Some(token) => token.to_str(),
-        None => Ok("no_token")
-        // None => return Err(Status::unauthenticated("Token not found"))
+        None => return Err(Status::unauthenticated("Token not found"))
     };
 
     println!("token: {}", token.unwrap());
