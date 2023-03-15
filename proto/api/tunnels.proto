@@ -5,31 +5,60 @@ package api;
 import "google/protobuf/empty.proto";
 
 service Tunnel {
-  rpc List(google.protobuf.Empty) returns (TunnelsData) {}
-  rpc Get(TunnelRequest) returns (TunnelsData) {}
-  rpc Add(TunnelData) returns (TunnelData) {}
-  rpc Delete(TunnelRequest) returns (TunnelData) {}
-  rpc Update(TunnelData) returns (TunnelData) {}
+  rpc List(google.protobuf.Empty) returns (TunnelsResponse) {}
+  rpc Get(TunnelRequest) returns (TunnelResponse) {}
+  rpc Add(TunnelAddRequest) returns (TunnelResponse) {}
+  rpc Delete(TunnelRequest) returns (TunnelResponse) {}
+  rpc Update(TunnelUpdateRequest) returns (TunnelResponse) {}
 }
 
-message TunnelData {
-  optional int32 ID = 1;
-  optional int32 version = 2;
+message TunnelResponse {
+  int32 ID = 1;
+  int32 version = 2;
   int32 router = 3;
   string IP = 4;
-  optional bool dynamic_ip = 5;
-  optional int32 ip_class = 6;
+  bool dynamic_ip = 5;
+  int32 ip_class = 6;
   string hostname = 7;
   string description = 8;
   string source = 9;
+  int32 cost = 10;
+  string tunnel_type = 11;
+  string topology_type = 12;
+}
+
+message TunnelAddRequest {
+  optional int32 version = 1;
+  int32 router = 2;
+  string IP = 3;
+  optional bool dynamic_ip = 4;
+  optional int32 ip_class = 5;
+  string hostname = 6;
+  string description = 7;
+  string source = 8;
+  optional int32 cost = 9;
+  optional string tunnel_type = 10;
+  optional string topology_type = 11;
+}
+
+message TunnelUpdateRequest {
+  int32 ID = 1;
+  optional int32 version = 2;
+  optional int32 router = 3;
+  optional string IP = 4;
+  optional bool dynamic_ip = 5;
+  optional int32 ip_class = 6;
+  optional string hostname = 7;
+  optional string description = 8;
+  optional string source = 9;
   optional int32 cost = 10;
   optional string tunnel_type = 11;
   optional string topology_type = 12;
 }
 
 /* List method */
-message TunnelsData {
-  repeated TunnelData tunnels = 1;
+message TunnelsResponse {
+  repeated TunnelResponse tunnels = 1;
 }
 
 /* Get method */

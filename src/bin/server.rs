@@ -1,10 +1,14 @@
-use std::env;
+use std::{
+    env,
+    time::Duration,
+};
 
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use diesel::r2d2::Pool;
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use dotenvy::dotenv;
+use tonic::{Request, Status};
 use tonic::transport::Server;
 
 use tunnel_manager::api::*;
@@ -40,24 +44,43 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let addr = format!("{}:{}", grpc_host, grpc_port).parse()?;
 
-    // let agent = agents::AgentService::new(pool.clone());
     // let auth = login::AuthService::new(pool.clone());
-    // let router = routers::RouterService::new(pool.clone());
-    // let tunnel = tunnels::TunnelService::new(pool.clone());
+    let agent = agents::AgentService::new(pool.clone());
+    let router = routers::RouterService::new(pool.clone());
+    let tunnel = tunnels::TunnelService::new(pool.clone());
     let user = users::UserService::new(pool.clone());
     let permission = permissions::PermissionService::new(pool.clone());
+
+    let layer = tower::ServiceBuilder::new()
+        .timeout(Duration::from_secs(30))
+        .layer(tonic::service::interceptor(auth_interceptor))
+        .into_inner();
 
     println!("Running on port {}", grpc_port);
 
     Server::builder()
-        // .add_service(agent_server::AgentServer::new(agent))
+        .layer(layer)
+        // .add_service(login_server::LoginServer::new(auth))
+        .add_service(agent_server::AgentServer::new(agent))
         // .add_service(auth_server::AuthServer::new(auth))
-        // .add_service(router_server::RouterServer::new(router))
-        // .add_service(tunnel_server::TunnelServer::new(tunnel))
+        .add_service(router_server::RouterServer::new(router))
+        .add_service(tunnel_server::TunnelServer::new(tunnel))
         .add_service(user_server::UserServer::new(user))
         .add_service(permission_server::PermissionServer::new(permission))
         .serve(addr)
         .await?;
 
     Ok(())
+}
+
+fn auth_interceptor(req: Request<()>) -> Result<Request<()>, Status> {
+    let token = match req.metadata().get("authorization") {
+        Some(token) => token.to_str(),
+        None => return Err(Status::unauthenticated("Token not found"))
+    };
+
+    println!("token: {}", token.unwrap());
+
+    // do some validation with token here ...
+    Ok(req)
 }
