@@ -145,27 +145,27 @@ impl Router {
             return Err(Status::invalid_argument("Router id is required"));
         }
 
-        if !router_data.agent.is_none() {
+        if router_data.agent.is_some() {
             update.agent = router_data.agent;
         }
 
-        if !router_data.snmp_community.is_none() {
+        if router_data.snmp_community.is_some() {
             update.snmp_community = router_data.snmp_community.clone();
         }
 
-        if !router_data.ssh_username.is_none() {
+        if router_data.ssh_username.is_some() {
             update.ssh_username = router_data.ssh_username.clone();
         }
 
-        if !router_data.ssh_password.is_none() {
+        if router_data.ssh_password.is_some() {
             update.ssh_password = router_data.ssh_password.clone();
         }
 
-        if !router_data.conn_type.is_none() {
+        if router_data.conn_type.is_some() {
             update.conn_type = router_data.conn_type.clone();
         }
 
-        if !router_data.router_type.is_none() {
+        if router_data.router_type.is_some() {
             update.router_type = router_data.router_type.clone();
         }
 

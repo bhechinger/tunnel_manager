@@ -3,8 +3,8 @@ use diesel::r2d2::{ConnectionManager, Pool};
 use tonic::Status;
 use tracing::instrument;
 
+use crate::api::{UserAddRequest, UserResponse, UserUpdateRequest};
 use crate::api::user_request::IdOrEmail;
-use crate::api::{UserResponse, UserAddRequest, UserUpdateRequest};
 use crate::schema::users;
 use crate::schema::users::dsl::*;
 use crate::storage::helpers::sql_err_to_grpc_error;
@@ -111,7 +111,7 @@ impl User {
             return Err(Status::invalid_argument("User id is required"));
         }
 
-        if !user_data.email.is_none() {
+        if user_data.email.is_some() {
             update.email = user_data.email;
         }
 

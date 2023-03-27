@@ -168,43 +168,43 @@ impl Tunnel {
         let conn = &mut pool.get().unwrap();
         let mut update = UpdateTunnel::default();
 
-        if !tunnel_data.version.is_none() {
+        if tunnel_data.version.is_some() {
             update.version = tunnel_data.version;
         }
 
-        if !tunnel_data.router.is_none() {
+        if tunnel_data.router.is_some() {
             update.router = tunnel_data.router;
         }
 
-        if !tunnel_data.ip.is_none() {
+        if tunnel_data.ip.is_some() {
             update.ip = tunnel_data.ip;
         }
 
-        if !tunnel_data.ip_class.is_none()  {
+        if tunnel_data.ip_class.is_some() {
             update.ip_class = tunnel_data.ip_class;
         }
 
-        if !tunnel_data.description.is_none() {
+        if tunnel_data.description.is_some() {
             update.description = tunnel_data.description;
         }
 
-        if !tunnel_data.source.is_none() {
+        if tunnel_data.source.is_some() {
             update.source = tunnel_data.source;
         }
 
-        if !tunnel_data.cost.is_none()  {
+        if tunnel_data.cost.is_some() {
             update.cost = tunnel_data.cost;
         }
 
-        if !tunnel_data.tunnel_type.is_none() {
+        if tunnel_data.tunnel_type.is_some() {
             update.tunnel_type = tunnel_data.tunnel_type;
         }
 
-        if !tunnel_data.hostname.is_none() {
+        if tunnel_data.hostname.is_some() {
             update.hostname = tunnel_data.hostname;
         }
 
-        if !tunnel_data.topology_type.is_none() {
+        if tunnel_data.topology_type.is_some() {
             update.topology_type = tunnel_data.topology_type;
         }
 

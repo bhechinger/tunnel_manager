@@ -1,6 +1,5 @@
 use std::{
     env,
-    time::Duration,
 };
 
 use diesel::prelude::*;
@@ -51,22 +50,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let user = users::UserService::new(pool.clone());
     let permission = permissions::PermissionService::new(pool.clone());
 
-    let layer = tower::ServiceBuilder::new()
-        .timeout(Duration::from_secs(30))
-        .layer(tonic::service::interceptor(auth_interceptor))
-        .into_inner();
-
     println!("Running on port {}", grpc_port);
 
     Server::builder()
-        .layer(layer)
         // .add_service(login_server::LoginServer::new(auth))
-        .add_service(agent_server::AgentServer::new(agent))
         // .add_service(auth_server::AuthServer::new(auth))
-        .add_service(router_server::RouterServer::new(router))
-        .add_service(tunnel_server::TunnelServer::new(tunnel))
-        .add_service(user_server::UserServer::new(user))
-        .add_service(permission_server::PermissionServer::new(permission))
+
+        // The following services require authentication
+        .add_service(agent_server::AgentServer::with_interceptor(agent, auth_interceptor))
+        .add_service(router_server::RouterServer::with_interceptor(router, auth_interceptor))
+        .add_service(tunnel_server::TunnelServer::with_interceptor(tunnel, auth_interceptor))
+        .add_service(user_server::UserServer::with_interceptor(user, auth_interceptor))
+        .add_service(permission_server::PermissionServer::with_interceptor(permission, auth_interceptor))
         .serve(addr)
         .await?;
 
