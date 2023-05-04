@@ -1,0 +1,12 @@
+[general]
+# Ignore certain rules (comma-separated list), you can reference them by
+# their id or by their full name
+ignore=body-is-missing
+ignore-merge-commits=true
+ignore-revert-commits=true
+ignore-fixup-commits=true
+ignore-squash-commits=true
+regex-style-search=true
+
+# See http://jorisroovers.github.io/gitlint/contrib_rules for details
+contrib=CT1
